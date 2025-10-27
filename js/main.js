@@ -21,14 +21,14 @@ let object;
 let controls;
 
 //Set which object to render
-let objToRender = 'eye';
+let objToRender = 'model_four';
 
 //Instantiate a loader for the .gltf file
 const loader = new GLTFLoader();
 
 //Load the file
 loader.load(
-  `./models/${objToRender}/scene.gltf`,
+  `./models/${objToRender}/model_five.gltf`,
   function (gltf) {
     //If the file is loaded, add it to the scene
     object = gltf.scene;
