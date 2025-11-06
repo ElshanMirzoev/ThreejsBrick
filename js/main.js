@@ -1,99 +1,197 @@
-//Import the THREE.js library
+// Import the THREE.js library
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
-// To allow for the camera to move around the scene
+// Camera controls
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js";
-// To allow for importing the .gltf file
+// GLTF loader
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
 
-//Create a Three.JS Scene
+// =====================
+// DOM elements (UI)
+// =====================
+const container = document.getElementById("container3D");
+const modelSelect = document.getElementById("modelSelect");
+const unloadBtn = document.getElementById("unloadBtn");
+
+// =====================
+// Scene / Camera / Renderer
+// =====================
 const scene = new THREE.Scene();
-//create a new camera with positions and angles
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-//Keep track of the mouse position, so we can make the eye move
-let mouseX = window.innerWidth / 2;
-let mouseY = window.innerHeight / 2;
+const camera = new THREE.PerspectiveCamera(
+  60,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  50000
+);
+camera.position.set(0, 2, 5);
 
-//Keep the 3D object on a global variable so we can access it later
-let object;
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+// Небольшой бонус для правильной гаммы (sRGB)
+if (THREE.sRGBEncoding) {
+  renderer.outputEncoding = THREE.sRGBEncoding;
+}
 
-//OrbitControls allow the camera to move around the scene
-let controls;
+container.appendChild(renderer.domElement);
 
-//Set which object to render
-let objToRender = 'model_four';
+// =====================
+// Lights
+// =====================
+const hemi = new THREE.HemisphereLight(0xffffff, 0x222233, 0.8);
+scene.add(hemi);
 
-//Instantiate a loader for the .gltf file
+const dir = new THREE.DirectionalLight(0xffffff, 1.0);
+dir.position.set(5, 10, 7);
+dir.castShadow = false;
+scene.add(dir);
+
+// =====================
+// Controls
+// =====================
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.enableRotate = true;     // вращение ЛКМ
+controls.enableZoom = true;       // колесико
+controls.screenSpacePanning = true;
+controls.minDistance = 0.1;
+controls.maxDistance = 100000;
+
+// =====================
+// Model loading
+// =====================
 const loader = new GLTFLoader();
 
-//Load the file
-loader.load(
-  `./models/${objToRender}/model_five.gltf`,
-  function (gltf) {
-    //If the file is loaded, add it to the scene
-    object = gltf.scene;
-    scene.add(object);
-  },
-  function (xhr) {
-    //While it is loading, log the progress
-    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-  },
-  function (error) {
-    //If there is an error, log it
-    console.error(error);
-  }
-);
+// Задай пути к моделям под свой проект (если имена файлов другие — поменяй строки)
+const MODEL_PATHS = {
+  model_four: "./models/nine/scene.gltf", // или model_four.gltf — как у тебя
+  six: "./models/ten/scene.gltf"
+};
 
-//Instantiate a new renderer and set its size
-const renderer = new THREE.WebGLRenderer({ alpha: true }); //Alpha: true allows for the transparent background
-renderer.setSize(window.innerWidth, window.innerHeight);
+let currentModel = null; // THREE.Object3D (корень загруженной сцены)
 
-//Add the renderer to the DOM
-document.getElementById("container3D").appendChild(renderer.domElement);
+// Очистка текущей модели из сцены и памяти
+function unloadCurrentModel() {
+  if (!currentModel) return;
 
-//Set how far the camera will be from the 3D model
-camera.position.z = objToRender === "dino" ? 25 : 500;
+  scene.remove(currentModel);
 
-//Add lights to the scene, so we can actually see the 3D model
-const topLight = new THREE.DirectionalLight(0xffffff, 1); // (color, intensity)
-topLight.position.set(500, 500, 500) //top-left-ish
-topLight.castShadow = true;
-scene.add(topLight);
+  // корректно освобождаем ресурсы
+  currentModel.traverse((node) => {
+    if (node.isMesh) {
+      if (node.geometry) node.geometry.dispose();
 
-const ambientLight = new THREE.AmbientLight(0x333333, objToRender === "dino" ? 5 : 1);
-scene.add(ambientLight);
+      if (node.material) {
+        const mats = Array.isArray(node.material) ? node.material : [node.material];
+        mats.forEach((m) => {
+          // Текстуры
+          for (const key in m) {
+            const val = m[key];
+            if (val && val.isTexture) {
+              val.dispose();
+            }
+          }
+          m.dispose?.();
+        });
+      }
+    }
+  });
 
-//This adds controls to the camera, so we can rotate / zoom it with the mouse
-if (objToRender === "dino") {
-  controls = new OrbitControls(camera, renderer.domElement);
+  currentModel = null;
 }
 
-//Render the scene
-function animate() {
-  requestAnimationFrame(animate);
-  //Here we could add some code to update the scene, adding some automatic movement
+// Подгоняем камеру и контролы под размер модели
+function fitCameraToObject(obj, offset = 1.2) {
+  // Вычисляем сферу, в которую вписывается объект
+  const box = new THREE.Box3().setFromObject(obj);
+  const size = new THREE.Vector3();
+  const center = new THREE.Vector3();
+  box.getSize(size);
+  box.getCenter(center);
 
-  //Make the eye move
-  if (object && objToRender === "eye") {
-    //I've played with the constants here until it looked good 
-    object.rotation.y = -3 + mouseX / window.innerWidth * 3;
-    object.rotation.x = -1.2 + mouseY * 2.5 / window.innerHeight;
-  }
-  renderer.render(scene, camera);
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const fov = (camera.fov * Math.PI) / 180;
+  let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2)));
+
+  cameraZ *= offset; // небольшой запас
+
+  // Обновляем позицию камеры и контролы
+  camera.position.set(center.x, center.y, center.z + cameraZ);
+  camera.near = cameraZ / 100;
+  camera.far = cameraZ * 100;
+  camera.updateProjectionMatrix();
+
+  controls.target.copy(center);
+  controls.maxDistance = cameraZ * 10;
+  controls.update();
 }
 
-//Add a listener to the window, so we can resize the window and the camera
-window.addEventListener("resize", function () {
+// Загрузка выбранной модели
+function loadModel(key) {
+  const url = MODEL_PATHS[key];
+  if (!url) {
+    console.warn(`Не задан путь для модели с ключом "${key}"`);
+    return;
+  }
+
+  // убрать предыдущую
+  unloadCurrentModel();
+
+  loader.load(
+    url,
+    (gltf) => {
+      currentModel = gltf.scene;
+      scene.add(currentModel);
+      fitCameraToObject(currentModel, 1.5);
+      console.log(`Модель "${key}" загружена: ${url}`);
+    },
+    (xhr) => {
+      if (xhr.total) {
+        console.log(`${((xhr.loaded / xhr.total) * 100).toFixed(1)}% загружено`);
+      } else {
+        console.log(`${xhr.loaded} байт загружено`);
+      }
+    },
+    (error) => {
+      console.error(`Ошибка загрузки модели "${key}" по пути ${url}:`, error);
+      alert(`Не удалось загрузить модель "${key}". Проверь путь к файлу в MODEL_PATHS.`);
+    }
+  );
+}
+
+// =====================
+// Events (UI + Resize)
+// =====================
+
+// выбор модели из меню
+modelSelect.addEventListener("change", (e) => {
+  const val = e.target.value;
+  if (val === "none") {
+    unloadCurrentModel();
+  } else {
+    loadModel(val);
+  }
+});
+
+// кнопка "Убрать модель"
+unloadBtn.addEventListener("click", () => {
+  modelSelect.value = "none";
+  unloadCurrentModel();
+});
+
+// ресайз
+window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-//add mouse position listener, so we can make the eye move
-document.onmousemove = (e) => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
+// =====================
+// Render loop
+// =====================
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
 }
-
-//Start the 3D rendering
 animate();

@@ -1,24 +1,69 @@
+/* Базовые стили страницы */
 body {
   margin: 0;
   font-family: "Montserrat", sans-serif;
   background-color: #000;
+  color: #fff;
 }
 
-header {
-  margin-top: 3em;
-  text-align: center;
-  color: white;
+header, #model-menu {
+  position: relative;
+  z-index: 10;
 }
 
-header h1 {
-  font-size: 2em;
-  font-weight: 900;
-}
-
+/* канвас на заднем плане */
 #container3D canvas {
   width: 100vw !important;
   height: 100vh !important;
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 1; /* ниже, чем меню */
+}
+
+header h1 {
+  font-size: 1.8em;
+  font-weight: 900;
+  margin-bottom: 0.4em;
+}
+
+/* Меню выбора модели */
+#model-menu {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+#model-menu label {
+  font-size: 0.95rem;
+  color: #ddd;
+}
+
+#model-menu select,
+#model-menu button {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  outline: none;
+}
+
+#model-menu button {
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.2s ease;
+}
+
+#model-menu button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+#model-menu button:active {
+  transform: scale(0.98);
 }
