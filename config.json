@@ -6,30 +6,409 @@
     }
   },
   "textures": {
-    "brick_yellow": {
-      "name": "Темный кирпич",
+    "brick_running_65_red_gray": {
+      "name": "Кладка 1 • 250×120×65 • Красный • Серый раствор",
       "path": "./textures/test2/test3.gltf",
       "tags": {
         "type": "brick",
-        "variant": "yellow"
+        "size": "250x120x65",
+        "layout": "running",
+        "color_brick": "red",
+        "color_rastvor": "gray"
       }
     },
-    "brick_mixed": {
-      "name": "Смешанный кирпич",
+    "brick_running_65_red_white": {
+      "name": "Кладка 1 • 250×120×65 • Красный • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "running",
+        "color_brick": "red",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_running_65_yellow_gray": {
+      "name": "Кладка 1 • 250×120×65 • Жёлтый • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "running",
+        "color_brick": "yellow",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_running_65_yellow_white": {
+      "name": "Кладка 1 • 250×120×65 • Жёлтый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "running",
+        "color_brick": "yellow",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_running_65_white_gray": {
+      "name": "Кладка 1 • 250×120×65 • Белый • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "running",
+        "color_brick": "white",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_running_65_white_white": {
+      "name": "Кладка 1 • 250×120×65 • Белый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "running",
+        "color_brick": "white",
+        "color_rastvor": "white"
+      }
+    },
+
+    "brick_stack_65_red_gray": {
+      "name": "Кладка 2 • 250×120×65 • Красный • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "stack",
+        "color_brick": "red",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_stack_65_red_white": {
+      "name": "Кладка 2 • 250×120×65 • Красный • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "stack",
+        "color_brick": "red",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_stack_65_yellow_gray": {
+      "name": "Кладка 2 • 250×120×65 • Жёлтый • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "stack",
+        "color_brick": "yellow",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_stack_65_yellow_white": {
+      "name": "Кладка 2 • 250×120×65 • Жёлтый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "stack",
+        "color_brick": "yellow",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_stack_65_white_gray": {
+      "name": "Кладка 2 • 250×120×65 • Белый • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "stack",
+        "color_brick": "white",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_stack_65_white_white": {
+      "name": "Кладка 2 • 250×120×65 • Белый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "stack",
+        "color_brick": "white",
+        "color_rastvor": "white"
+      }
+    },
+
+    "brick_herringbone_65_red_gray": {
+      "name": "Кладка 3 • 250×120×65 • Красный • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "herringbone",
+        "color_brick": "red",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_herringbone_65_red_white": {
+      "name": "Кладка 3 • 250×120×65 • Красный • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "herringbone",
+        "color_brick": "red",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_herringbone_65_yellow_gray": {
+      "name": "Кладка 3 • 250×120×65 • Жёлтый • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "herringbone",
+        "color_brick": "yellow",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_herringbone_65_yellow_white": {
+      "name": "Кладка 3 • 250×120×65 • Жёлтый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "herringbone",
+        "color_brick": "yellow",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_herringbone_65_white_gray": {
+      "name": "Кладка 3 • 250×120×65 • Белый • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "herringbone",
+        "color_brick": "white",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_herringbone_65_white_white": {
+      "name": "Кладка 3 • 250×120×65 • Белый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x65",
+        "layout": "herringbone",
+        "color_brick": "white",
+        "color_rastvor": "white"
+      }
+    },
+
+    "brick_running_88_red_gray": {
+      "name": "Кладка 1 • 250×120×88 • Красный • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "running",
+        "color_brick": "red",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_running_88_red_white": {
+      "name": "Кладка 1 • 250×120×88 • Красный • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "running",
+        "color_brick": "red",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_running_88_yellow_gray": {
+      "name": "Кладка 1 • 250×120×88 • Жёлтый • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "running",
+        "color_brick": "yellow",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_running_88_yellow_white": {
+      "name": "Кладка 1 • 250×120×88 • Жёлтый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "running",
+        "color_brick": "yellow",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_running_88_white_gray": {
+      "name": "Кладка 1 • 250×120×88 • Белый • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "running",
+        "color_brick": "white",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_running_88_white_white": {
+      "name": "Кладка 1 • 250×120×88 • Белый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "running",
+        "color_brick": "white",
+        "color_rastvor": "white"
+      }
+    },
+
+    "brick_stack_88_red_gray": {
+      "name": "Кладка 2 • 250×120×88 • Красный • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "stack",
+        "color_brick": "red",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_stack_88_red_white": {
+      "name": "Кладка 2 • 250×120×88 • Красный • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "stack",
+        "color_brick": "red",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_stack_88_yellow_gray": {
+      "name": "Кладка 2 • 250×120×88 • Жёлтый • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "stack",
+        "color_brick": "yellow",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_stack_88_yellow_white": {
+      "name": "Кладка 2 • 250×120×88 • Жёлтый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "stack",
+        "color_brick": "yellow",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_stack_88_white_gray": {
+      "name": "Кладка 2 • 250×120×88 • Белый • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "stack",
+        "color_brick": "white",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_stack_88_white_white": {
+      "name": "Кладка 2 • 250×120×88 • Белый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "stack",
+        "color_brick": "white",
+        "color_rastvor": "white"
+      }
+    },
+
+    "brick_herringbone_88_red_gray": {
+      "name": "Кладка 3 • 250×120×88 • Красный • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "herringbone",
+        "color_brick": "red",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_herringbone_88_red_white": {
+      "name": "Кладка 3 • 250×120×88 • Красный • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "herringbone",
+        "color_brick": "red",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_herringbone_88_yellow_gray": {
+      "name": "Кладка 3 • 250×120×88 • Жёлтый • Серый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "herringbone",
+        "color_brick": "yellow",
+        "color_rastvor": "gray"
+      }
+    },
+    "brick_herringbone_88_yellow_white": {
+      "name": "Кладка 3 • 250×120×88 • Жёлтый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "tags": {
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "herringbone",
+        "color_brick": "yellow",
+        "color_rastvor": "white"
+      }
+    },
+    "brick_herringbone_88_white_gray": {
+      "name": "Кладка 3 • 250×120×88 • Белый • Серый раствор",
       "path": "./textures/mixed_brick/mixed_brick_wall_2k.gltf",
       "tags": {
         "type": "brick",
-        "variant": "mixed"
+        "size": "250x120x88",
+        "layout": "herringbone",
+        "color_brick": "white",
+        "color_rastvor": "gray"
       }
     },
-    "stone_rock": {
-      "name": "Скальный камень",
-      "path": "./textures/rock_ball/rock_wall_15_4k.gltf",
+    "brick_herringbone_88_white_white": {
+      "name": "Кладка 3 • 250×120×88 • Белый • Белый раствор",
+      "path": "./textures/test2/test3.gltf",
+      "comment": "старый путь: ./textures/rock_ball/rock_wall_15_4k.gltf",
+      "_note": "старый путь был: ./textures/mixed_brick/mixed_brick_wall_2k.gltf",
       "tags": {
-        "type": "stone",
-        "variant": "rock"
+        "type": "brick",
+        "size": "250x120x88",
+        "layout": "herringbone",
+        "color_brick": "white",
+        "color_rastvor": "white"
       }
+      
     }
   }
 }
-
