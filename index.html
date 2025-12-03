@@ -4,83 +4,71 @@
     <meta charset="utf-8" />
     <title>Визуализатор кирпичной кладки</title>
     <link rel="stylesheet" href="css/style.css" />
-    <style>
-      :root { color-scheme: light dark; }
-      body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-      header { padding: 12px 16px; border-bottom: 1px solid #000; }
-      h1 { margin: 0 0 8px; font-size: 20px; }
-      .panel { display: grid; gap: 12px; grid-template-columns: 1fr; max-width: 1100px; margin: 0 auto; }
-      fieldset { border: 1px solid rgba(0,0,0,.33); border-radius: 10px; padding: 8px 12px; }
-      legend { padding: 0 6px; opacity: 0.9; }
-      .options { display: flex; gap: 12px; flex-wrap: wrap; }
-      .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-      .btn { padding: 8px 14px; border-radius: 10px; border: 1px solid #000; cursor: pointer; background: transparent; }
-      .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
-      main { position: relative; padding: 12px 16px; }
-    </style>
   </head>
   <body>
     <header>
-      <h1 style="color: #111; text-align: center;">Череповецкий завод силикатного кирпича</h1>
+      <h1>Череповецкий завод силикатного кирпича</h1>
 
-      <!-- Панель выбора параметров (всегда видима) -->
+      <!-- Панель выбора параметров -->
       <nav class="panel" id="config-panel" aria-label="Конфигуратор">
-        <!-- Проект дома -->
-        <fieldset>
-          <legend style="color: #111;">Объект</legend>
+        <!-- ОБЪЕКТ (отдельным блоком сверху) -->
+        <fieldset class="object-fieldset">
+          <legend>Объект</legend>
           <div class="row">
-            <select id="model-select" style="padding: 8px; border-radius: 6px; border: 1px solid rgba(0,0,0,.33);">
+            <select id="model-select">
               <option value="">— Выберите объект —</option>
             </select>
           </div>
         </fieldset>
 
-        <!-- Размер кирпича -->
-        <fieldset>
-          <legend style="color: #111;">Размер кирпича</legend>
-          <div class="options" id="size-options">
-            <label style="color: #111;"><input type="radio" name="size" value="250x120x65" /> 250×120×65</label>
-            <label style="color: #111;"><input type="radio" name="size" value="250x120x88" /> 250×120×88</label>
-          </div>
-        </fieldset>
+        <!-- Остальные меню в одну строку -->
+        <div class="settings-row">
+          <!-- Размер кирпича -->
+          <fieldset>
+            <legend>Размер кирпича</legend>
+            <div class="options" id="size-options">
+              <label><input type="radio" name="size" value="250x120x65" /> 250×120×65</label>
+              <label><input type="radio" name="size" value="250x120x88" /> 250×120×88</label>
+            </div>
+          </fieldset>
 
-        <!-- Вид кладки -->
-        <fieldset>
-          <legend style="color: #111;">Вид кладки</legend>
-          <div class="options" id="layout-options">
-            <!-- Примеры вариантов (значения = теги 'layout' в config.json) -->
-            <label style="color: #111;"><input type="radio" name="layout" value="running" /> Кладка 1</label>
-            <label style="color: #111;"><input type="radio" name="layout" value="stack" /> Кладка 2</label>
-            <label style="color: #111;"><input type="radio" name="layout" value="herringbone" /> Кладка 3</label>
-          </div>
-        </fieldset>
+          <!-- Вид кладки -->
+          <fieldset>
+            <legend>Вид кладки</legend>
+            <div class="options" id="layout-options">
+              <label><input type="radio" name="layout" value="running" /> Кладка 1</label>
+              <label><input type="radio" name="layout" value="stack" /> Кладка 2</label>
+              <label><input type="radio" name="layout" value="herringbone" /> Кладка 3</label>
+            </div>
+          </fieldset>
 
-        <!-- Цвет кирпича -->
-        <fieldset>
-          <legend style="color: #111;">Цвет кирпича</legend>
-          <div class="options" id="color-brick-options">
-            <label style="color: #111;"><input type="radio" name="color_brick" value="red" /> Красный</label>
-            <label style="color: #111;"><input type="radio" name="color_brick" value="yellow" /> Жёлтый</label>
-            <label style="color: #111;"><input type="radio" name="color_brick" value="white" /> Белый</label>
-          </div>
-        </fieldset>
+          <!-- Цвет кирпича -->
+          <fieldset>
+            <legend>Цвет кирпича</legend>
+            <div class="options" id="color-brick-options">
+              <label><input type="radio" name="color_brick" value="red" /> Красный</label>
+              <label><input type="radio" name="color_brick" value="yellow" /> Жёлтый</label>
+              <label><input type="radio" name="color_brick" value="white" /> Белый</label>
+            </div>
+          </fieldset>
 
-        <!-- Цвет раствора -->
-        <fieldset>
-          <legend style="color: #111;">Цвет раствора</legend>
-          <div class="options" id="color-rastvor-options">
-            <label style="color: #111;"><input type="radio" name="color_rastvor" value="gray" /> Серый</label>
-            <label style="color: #111;"><input type="radio" name="color_rastvor" value="white" /> Белый</label>
-          </div>
-        </fieldset>
-
-        <!-- Действия -->
-        <div class="row">
-          <button id="loadBtn" class="btn" disabled style="color: #111;">Визуализация</button>
-          <button id="resetBtn" class="btn" type="button" style="color: #111;">Сброс</button>
-          <span id="status" aria-live="polite" style="color: #111;"></span>
+          <!-- Цвет раствора -->
+          <fieldset>
+            <legend>Цвет раствора</legend>
+            <div class="options" id="color-rastvor-options">
+              <label><input type="radio" name="color_rastvor" value="gray" /> Серый</label>
+              <label><input type="radio" name="color_rastvor" value="white" /> Белый</label>
+            </div>
+          </fieldset>
         </div>
       </nav>
+
+      <!-- Кнопки ниже всех меню -->
+      <div class="actions-row">
+        <button id="loadBtn" class="btn" disabled>Визуализация</button>
+        <button id="resetBtn" class="btn" type="button">Сброс</button>
+        <span id="status" aria-live="polite" class="status-text"></span>
+      </div>
     </header>
 
     <main>
