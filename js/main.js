@@ -36,6 +36,26 @@ const REQUIRED_TAG_KEYS = [
 ];
 const FIXED_TYPE = "brick"; // всегда сопоставляем тип "brick"
 
+function updateStatus(message, type = "log") {
+  // 1. Оставляем визуальное подтверждение для пользователя (опционально)
+  // if (statusEl) statusEl.textContent = message;
+
+  // 2. Выводим в консоль с цветовой маркировкой
+  const timestamp = new Date().toLocaleTimeString();
+  const prefix = `[${timestamp}]`;
+
+  switch (type) {
+    case "error":
+      console.error(`${prefix} ОШИБКА: ${message}`);
+      break;
+    case "warn":
+      console.warn(`${prefix} ПРЕДУПРЕЖДЕНИЕ: ${message}`);
+      break;
+    default:
+      console.log(`${prefix} ИНФО: ${message}`);
+  }
+}
+
 // Конфигурация (config.json)
 let MODELS_CONFIG = {};
 let TEXTURES_CONFIG = {};
@@ -70,7 +90,7 @@ container.appendChild(renderer.domElement);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.6;
+renderer.toneMappingExposure = 0.85;
 
 // Окружение EXR
 const exrLoader = new EXRLoader();
@@ -102,10 +122,10 @@ function sizeFromContainer() {
 sizeFromContainer();
 
 // Lights
-const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.9);
+const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
 hemi.position.set(0, 20, 0);
 scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xffffff, 2.5);
+const sun = new THREE.DirectionalLight(0xffffff, 0.3);
 sun.position.set(10, 25, 15);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
@@ -368,7 +388,7 @@ async function loadConfig() {
     return true;
   } catch (err) {
     console.error("Ошибка загрузки конфиг файла:", err);
-    statusEl.textContent = "Ошибка загрузки конфигурации";
+    updateStatus("Ошибка загрузки конфигурации", "error");
     return false;
   }
 }
@@ -461,7 +481,7 @@ function loadModelByKey(key) {
       resolve();
     } catch (err) {
       console.error(`Ошибка загрузки модели "${key}":`, err);
-      statusEl.textContent = `Ошибка загрузки модели`;
+      updateStatus("Ошибка загрузки модели", "error");
       alert(`Не удалось загрузить модель "${cfg.name}". ${err.message}`);
       reject(err);
     }
@@ -537,9 +557,9 @@ function findExactTextureByTags(selection) {
 function mapBrickColor(tagColor) {
   switch (tagColor) {
     case "red":
-      return "#7E4438FF";
+      return "#6c0c16ff";
     case "yellow":
-      return "#c1995bff";
+      return "#A8854FFF";
     case "white":
       return "#D4D4D4FF";
     default:
@@ -666,7 +686,7 @@ function restoreOriginalTargetMaterial() {
       }
     });
     targetMat.needsUpdate = true;
-    statusEl.textContent = `Нет точного совпадения. Показана исходная модель (без текстуры на "${TARGET_MATERIAL_NAME}").`;
+    updateStatus("Нет точного совпадения. Возврат к исходной модели.", "warn");
     return;
   }
 
@@ -681,6 +701,10 @@ function restoreOriginalTargetMaterial() {
   }
   Object.assign(targetMat, restored);
   targetMat.needsUpdate = true;
+
+  targetMat.color.set(0xffffff); // Убедитесь, что основной цвет материала белый (чтобы не искажать текстуру)
+  targetMat.roughness = 0.85; // Делаем поверхность шершавой (матовой). Чем выше, тем меньше бликов.
+  targetMat.metalness = 0.0; // Кирпич не металл, ставим строго 0.
 
   statusEl.textContent = `Нет точного совпадения. Показана исходная модель (без текстуры на "${TARGET_MATERIAL_NAME}").`;
 }
@@ -747,7 +771,7 @@ function applyMatchedTextureToTarget(matchedCfg) {
   // 1. Ищем нужный материал в загруженной модели
   const targetMat = modelMaterials.get(TARGET_MATERIAL_NAME);
   if (!targetMat) {
-    statusEl.textContent = `Материал "${TARGET_MATERIAL_NAME}" не найден в модели.`;
+    updateStatus("Материал " + TARGET_MATERIAL_NAME + " не найден", "warn");
     return;
   }
 
@@ -799,7 +823,9 @@ function applyMatchedTextureToTarget(matchedCfg) {
   }
 
   loadEnvironmentOnce();
-  statusEl.textContent = `Текстура применена (Scale: ${brickScale})`;
+  targetMat.envMapIntensity = 0.5; // Снижаем влияние внешних отражений, чтобы "родной" цвет был чище
+
+  updateStatus("Текстура успешно применена (Scale: " + brickScale + ")");
   console.log(`Применена текстура: ${matchedCfg.key}`, canvasParams);
 }
 
@@ -863,8 +889,10 @@ function attachSelectionListeners() {
 async function initUI() {
   const configLoaded = await loadConfig();
   if (!configLoaded) {
-    statusEl.textContent =
-      "Ошибка загрузки конфигурации. Проверьте config.json";
+    updateStatus(
+      "Конфигурация не загружена. Проверьте наличие config.json",
+      "error"
+    );
     return;
   }
 
@@ -907,7 +935,7 @@ async function initUI() {
     envLoaded = false;
 
     updateLoadAvailability();
-    statusEl.textContent = "Выполнен сброс.";
+    updateStatus("Состояние сцены сброшено");
   });
 }
 
