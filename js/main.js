@@ -1,4 +1,4 @@
-// ===== Imports =====
+// Imports
 import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
 import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
@@ -6,7 +6,7 @@ import { DRACOLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/
 import { KTX2Loader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/KTX2Loader.js";
 import { EXRLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/EXRLoader.js";
 
-// ===== DOM =====
+// DOM
 const container = document.getElementById("container3D");
 const modelSelect = document.getElementById("model-select");
 const loadBtn = document.getElementById("loadBtn");
@@ -14,24 +14,33 @@ const resetBtn = document.getElementById("resetBtn");
 const statusEl = document.getElementById("status");
 
 // Новые модули выбора
-const radiosSize = () => Array.from(document.querySelectorAll('input[name="size"]'));
-const radiosLayout = () => Array.from(document.querySelectorAll('input[name="layout"]'));
-const radiosColorBrick = () => Array.from(document.querySelectorAll('input[name="color_brick"]'));
-const radiosColorRastvor = () => Array.from(document.querySelectorAll('input[name="color_rastvor"]'));
+const radiosSize = () =>
+  Array.from(document.querySelectorAll('input[name="size"]'));
+const radiosLayout = () =>
+  Array.from(document.querySelectorAll('input[name="layout"]'));
+const radiosColorBrick = () =>
+  Array.from(document.querySelectorAll('input[name="color_brick"]'));
+const radiosColorRastvor = () =>
+  Array.from(document.querySelectorAll('input[name="color_rastvor"]'));
 
-// ===== Константы назначений в модели =====
-// Материал, на который НАКЛАДЫВАЕМ только при точном совпадении по тегам
+// Материал, на который накладываем только при точном совпадении по тегам
 const TARGET_MATERIAL_NAME = "Bricks026";
 
 // Какие теги требуем для точного совпадения
-const REQUIRED_TAG_KEYS = ["type", "size", "layout", "color_brick", "color_rastvor"];
+const REQUIRED_TAG_KEYS = [
+  "type",
+  "size",
+  "layout",
+  "color_brick",
+  "color_rastvor",
+];
 const FIXED_TYPE = "brick"; // всегда сопоставляем тип "brick"
 
-// ===== Конфигурация (config.json) =====
+// Конфигурация (config.json)
 let MODELS_CONFIG = {};
 let TEXTURES_CONFIG = {};
 
-// ===== Состояние =====
+// Состояние
 let currentModel = null;
 const modelMaterials = new Map(); // name -> THREE.Material
 let originalTargetMaterial = null; // глубокая копия исходного материала TARGET_MATERIAL_NAME
@@ -44,10 +53,10 @@ const cameraLimits = {
   minTargetX: null,
   maxTargetX: null,
   minTargetZ: null,
-  maxTargetZ: null
+  maxTargetZ: null,
 };
 
-// ===== Three.js: Scene / Camera / Renderer =====
+// Three.js: Scene / Camera / Renderer
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, 16 / 9, 0.1, 50000);
 camera.position.set(0, 2, 5);
@@ -56,16 +65,14 @@ const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
 container.appendChild(renderer.domElement);
-// 🔹 ВКЛЮЧАЕМ ТЕНИ
+
+// Тени
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-
-// (опционально, но полезно для HDR/EXR)
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.6; // попробуй 1.4–1.8
+renderer.toneMappingExposure = 1.6;
 
-// ===== Окружение EXR: ленивое подключение =====
+// Окружение EXR
 const exrLoader = new EXRLoader();
 let envLoaded = false;
 
@@ -76,13 +83,12 @@ function loadEnvironmentOnce() {
   exrLoader.setPath("./hdr/");
   exrLoader.load("lilienstein_1k.exr", (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping;
-    scene.background = texture;    // фон
-    scene.environment = texture;   // отражения
+    scene.background = texture; // фон
+    scene.environment = texture; // отражения
     envLoaded = true;
     void "./hdr/";
   });
 }
-
 
 // Установка начального размера по контейнеру
 function sizeFromContainer() {
@@ -95,15 +101,12 @@ function sizeFromContainer() {
 }
 sizeFromContainer();
 
-// ===== Lights =====
-
-// Мягкий "небесный" свет сверху + отражённый от земли
-const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.9); // было 0.6
+// Lights
+const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.9);
 hemi.position.set(0, 20, 0);
 scene.add(hemi);
-
-const sun = new THREE.DirectionalLight(0xffffff, 2.5); // было 1.2
-sun.position.set(10, 25, 15); // чуть выше и дальше, чтобы тень длиннее и мягче
+const sun = new THREE.DirectionalLight(0xffffff, 2.5);
+sun.position.set(10, 25, 15);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
 sun.shadow.camera.near = 1;
@@ -125,24 +128,30 @@ controls.screenSpacePanning = true;
 controls.minDistance = 0.1;
 controls.maxDistance = 100000;
 
-// ===== Loaders =====
+// Loaders
 const loader = new GLTFLoader();
 
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath("https://cdn.skypack.dev/three@0.129.0/examples/js/libs/draco/");
+dracoLoader.setDecoderPath(
+  "https://cdn.skypack.dev/three@0.129.0/examples/js/libs/draco/"
+);
 loader.setDRACOLoader(dracoLoader);
 
 const ktx2Loader = new KTX2Loader()
-  .setTranscoderPath("https://cdn.skypack.dev/three@0.129.0/examples/js/libs/basis/")
+  .setTranscoderPath(
+    "https://cdn.skypack.dev/three@0.129.0/examples/js/libs/basis/"
+  )
   .detectSupport(renderer);
 loader.setKTX2Loader(ktx2Loader);
 
-// ===== Helpers =====
+// Helpers
 function disposeObject(obj) {
   obj.traverse((node) => {
     if (node.isMesh) {
       node.geometry?.dispose();
-      const mats = Array.isArray(node.material) ? node.material : [node.material];
+      const mats = Array.isArray(node.material)
+        ? node.material
+        : [node.material];
       mats.forEach((m) => {
         if (!m) return;
         for (const k in m) {
@@ -181,9 +190,16 @@ function logSceneStructure(obj, depth = 0) {
   const indent = "  ".repeat(depth);
   console.log(
     `${indent}${obj.name || "unnamed"} (${obj.type})`,
-    obj.isMesh ? `- Material: ${Array.isArray(obj.material) ? obj.material.map(m=>m?.name).join(", ") : (obj.material?.name || "no-name")}` : ""
+    obj.isMesh
+      ? `- Material: ${
+          Array.isArray(obj.material)
+            ? obj.material.map((m) => m?.name).join(", ")
+            : obj.material?.name || "no-name"
+        }`
+      : ""
   );
-  if (obj.children) obj.children.forEach((child) => logSceneStructure(child, depth + 1));
+  if (obj.children)
+    obj.children.forEach((child) => logSceneStructure(child, depth + 1));
 }
 
 // Красиво кадрируем камеру на объект с настраиваемым ракурсом
@@ -193,7 +209,7 @@ function fitCameraToObject(obj, opts = {}) {
     azimuthDeg = 222,
     startHeightRatio = 0.25,
     minZoomRatio = 0.57,
-    maxZoomRatio = 1.1
+    maxZoomRatio = 1.1,
   } = opts;
 
   const box = new THREE.Box3().setFromObject(obj);
@@ -214,24 +230,24 @@ function fitCameraToObject(obj, opts = {}) {
   if (maxDim <= 0) return;
 
   const groundY = box.min.y;
-  const height  = size.y;
+  const height = size.y;
 
-  // 1) Точка, вокруг которой крутимся
+  // Точка, вокруг которой крутимся
   const targetY = groundY + height * startHeightRatio;
 
-  // 2) Базовая дистанция
+  // Базовая дистанция
   const fovRad = THREE.MathUtils.degToRad(camera.fov);
   const half = maxDim * 0.5;
   let baseDistance = (half / Math.tan(fovRad / 2)) * offset;
   const minBase = Math.max(0.5, maxDim * 0.6);
   baseDistance = Math.max(baseDistance, minBase);
 
-  // 3) Позиция камеры
+  // Позиция камеры
   const az = THREE.MathUtils.degToRad(azimuthDeg);
 
   const camX = center.x + Math.sin(az) * baseDistance;
   const camZ = center.z + Math.cos(az) * baseDistance;
-  const camY = targetY + height * 0.10;
+  const camY = targetY + height * 0.1;
 
   camera.position.set(camX, camY, camZ);
 
@@ -241,10 +257,10 @@ function fitCameraToObject(obj, opts = {}) {
   }
 
   camera.near = Math.max(0.01, baseDistance / 100);
-  camera.far  = baseDistance * 10;
+  camera.far = baseDistance * 10;
   camera.updateProjectionMatrix();
 
-  // 4) Контроллер
+  // Контроллер
   controls.target.set(center.x, targetY, center.z);
 
   controls.minDistance = baseDistance * minZoomRatio;
@@ -255,7 +271,7 @@ function fitCameraToObject(obj, opts = {}) {
   controls.enableZoom = true;
   controls.update();
 
-  // 5) ГРАНИЦЫ ДЛЯ ПАНОРАМИРОВАНИЯ (X/Z + Y)
+  // Границы для панорамирования
   const margin = maxDim * 0.3; // можно чуть выезжать за дом, но недалеко
 
   cameraLimits.minTargetY = groundY + height * 0.05;
@@ -268,7 +284,7 @@ function fitCameraToObject(obj, opts = {}) {
 
   // навешиваем слушатель один раз
   if (!controls._hasPanClamp) {
-    controls.addEventListener('change', clampCameraPan);
+    controls.addEventListener("change", clampCameraPan);
     controls._hasPanClamp = true;
   }
 }
@@ -279,7 +295,6 @@ function clampCameraPan() {
   const t = controls.target;
   const p = camera.position;
 
-  // === 1) КЛАМП ПО Y (чтобы не уйти под дом) ===
   if (t.y < cameraLimits.minTargetY) {
     const dy = cameraLimits.minTargetY - t.y;
     t.y = cameraLimits.minTargetY;
@@ -290,11 +305,7 @@ function clampCameraPan() {
     p.y = cameraLimits.minCameraY;
   }
 
-  // === 2) КЛАМП ПО X/Z (чтобы центр орбиты не уезжал от дома) ===
-  if (
-    cameraLimits.minTargetX !== null &&
-    cameraLimits.minTargetZ !== null
-  ) {
+  if (cameraLimits.minTargetX !== null && cameraLimits.minTargetZ !== null) {
     let newX = THREE.MathUtils.clamp(
       t.x,
       cameraLimits.minTargetX,
@@ -335,7 +346,7 @@ function deepCloneMaterial(mat) {
     "displacementMap",
     "alphaMap",
     "envMap",
-    "lightMap"
+    "lightMap",
   ];
   possibleMaps.forEach((k) => {
     if (mat[k]) cloned[k] = mat[k].clone();
@@ -344,11 +355,12 @@ function deepCloneMaterial(mat) {
   return cloned;
 }
 
-// ===== Config =====
+// Config
 async function loadConfig() {
   try {
     const response = await fetch("./config.json");
-    if (!response.ok) throw new Error(`Ошибка загрузки config.json: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Ошибка загрузки config.json: ${response.status}`);
     const config = await response.json();
     MODELS_CONFIG = config.models || {};
     TEXTURES_CONFIG = config.textures || {};
@@ -361,7 +373,7 @@ async function loadConfig() {
   }
 }
 
-// ===== Загрузка модели по ключу =====
+// Загрузка модели по ключу
 function loadModelByKey(key) {
   const cfg = MODELS_CONFIG[key];
   if (!cfg) return Promise.reject(new Error(`Неизвестный ключ модели: ${key}`));
@@ -404,28 +416,27 @@ function loadModelByKey(key) {
       currentModel = gltf.scene;
       scene.add(currentModel);
 
-      // 🔹 Разрешаем объекту отбрасывать и принимать тени
+      // Разрешаем объекту отбрасывать и принимать тени
       currentModel.traverse((node) => {
         if (node.isMesh) {
           node.castShadow = true;
           node.receiveShadow = true;
         }
-      });      
+      });
 
-      // ===== Ground (приёмник теней) =====
+      // Ground (приёмник теней)
       const groundGeo = new THREE.PlaneGeometry(200, 200);
       // ShadowMaterial делает пол почти прозрачным, но с видимыми тенями
-      const groundMat = new THREE.ShadowMaterial({ opacity: 0.15 }); // было 0.25
-      
+      const groundMat = new THREE.ShadowMaterial({ opacity: 0.15 });
+
       const ground = new THREE.Mesh(groundGeo, groundMat);
       ground.rotation.x = -Math.PI / 2;
-      ground.position.y = 0; // если дом стоит не на 0, можно потом подправить
+      ground.position.y = 0;
 
       ground.receiveShadow = true;
       scene.add(ground);
 
-
-      // 🔹 Прячем модель до применения текстуры
+      // Прячем модель до применения текстуры
       currentModel.visible = false;
       fitCameraToObject(currentModel, 1.5);
 
@@ -433,7 +444,7 @@ function loadModelByKey(key) {
       const mats = extractModelMaterials(currentModel);
       mats.forEach((mat, name) => modelMaterials.set(name, mat));
 
-      // Сохраняем ИСХОДНЫЙ материал целевой стены для отката
+      // Сохраняем исходный материал целевой стены для отката
       const targetMat = modelMaterials.get(TARGET_MATERIAL_NAME);
       if (targetMat) {
         originalTargetMaterial = deepCloneMaterial(targetMat);
@@ -457,7 +468,7 @@ function loadModelByKey(key) {
   });
 }
 
-// ===== Работа с выбором пользователя =====
+// Работа с выбором пользователя
 function getCurrentSelection() {
   const getCheckedValue = (nodeList) => {
     const n = nodeList.find((n) => n.checked);
@@ -474,7 +485,13 @@ function getCurrentSelection() {
 }
 
 function allModulesSelected(sel) {
-  return !!(sel.modelKey && sel.size && sel.layout && sel.color_brick && sel.color_rastvor);
+  return !!(
+    sel.modelKey &&
+    sel.size &&
+    sel.layout &&
+    sel.color_brick &&
+    sel.color_rastvor
+  );
 }
 
 function updateLoadAvailability() {
@@ -482,10 +499,9 @@ function updateLoadAvailability() {
   loadBtn.disabled = !allModulesSelected(sel);
 }
 
-// ===== Поиск точного совпадения по тегам =====
+// Поиск точного совпадения по тегам
 function findExactTextureByTags(selection) {
-  // ВНИМАНИЕ: требуем ПОЛНОЕ совпадение по ВСЕМ ключам REQUIRED_TAG_KEYS
-  // + принудительно type="brick"
+  // требуем полное совпадение по всем ключам REQUIRED_TAG_KEYS
   const desired = {
     type: FIXED_TYPE,
     size: selection.size,
@@ -499,9 +515,15 @@ function findExactTextureByTags(selection) {
     let ok = true;
     for (const k of REQUIRED_TAG_KEYS) {
       if (k === "type") {
-        if ((tags[k] || "") !== FIXED_TYPE) { ok = false; break; }
+        if ((tags[k] || "") !== FIXED_TYPE) {
+          ok = false;
+          break;
+        }
       } else {
-        if ((tags[k] || "") !== desired[k]) { ok = false; break; }
+        if ((tags[k] || "") !== desired[k]) {
+          ok = false;
+          break;
+        }
       }
     }
     if (ok) {
@@ -511,110 +533,94 @@ function findExactTextureByTags(selection) {
   return null;
 }
 
-// ===== Карты цветов/размеров по тегам (для процедурной генерации) =====
+// Карты цветов/размеров по тегам (для процедурной генерации)
 function mapBrickColor(tagColor) {
   switch (tagColor) {
-    case "red":    return "#7E4438FF";
-    case "yellow": return "#c1995bff";
-    case "white":  return "#D4D4D4FF";
-    default:       return "#fff";
+    case "red":
+      return "#7E4438FF";
+    case "yellow":
+      return "#c1995bff";
+    case "white":
+      return "#D4D4D4FF";
+    default:
+      return "#fff";
   }
 }
 
 function mapMortarColor(tagColor) {
   switch (tagColor) {
-    case "gray":  return "#0B0B0BFF";
-    case "white": return "#A7A7A7FF";
-    default:      return "#fff";
+    case "gray":
+      return "#0B0B0BFF";
+    case "white":
+      return "#A7A7A7FF";
+    default:
+      return "#fff";
   }
 }
 
 function mapBrickPixelSize(sizeTag) {
   // Примитивное различие высоты кирпича по размеру
-  // 250×120×65 -> кирпич «ниже», 250×120×88 -> «выше»
   switch (sizeTag) {
-    case "250x120x88": return [120, 40];
-    case "250x120x65": return [120, 32];
-        default:           return [50, 20];
+    case "250x120x88":
+      return [120, 40];
+    case "250x120x65":
+      return [120, 32];
+    default:
+      return [50, 20];
   }
 }
 
-// ===== Генератор canvas-текстуры кирпичной кладки =====
+// Генератор canvas-текстуры кирпичной кладки
 function createBrickCanvas(params) {
+  const texSize = 1024;
   const {
-    textureSize = [1024, 1024],
-    brickPixelSize = [50, 20],
-    jointThickness = 4,
     brickColor = "#b5372a",
     mortarColor = "#bfbfbf",
-    layout = "running" // "running" | "stack" | "herringbone"
+    layout = "running",
   } = params;
 
-  const [texW, texH] = textureSize;
-  const [brickW, brickH] = brickPixelSize;
+  const targetStepY = params.brickPixelSize[1] + params.jointThickness;
+
+  // ГЛАВНОЕ ИСПРАВЛЕНИЕ:
+  // Находим ближайшее ЧЕТНОЕ число рядов
+  let countY = Math.round(texSize / targetStepY);
+  if (countY % 2 !== 0) countY++; // Если нечетное — прибавляем 1
+
+  const stepY = texSize / countY;
+
+  const targetStepX = params.brickPixelSize[0] + params.jointThickness;
+  const countX = Math.round(texSize / targetStepX);
+  const stepX = texSize / countX;
+
+  const joint = params.jointThickness;
+  const brickW = stepX - joint;
+  const brickH = stepY - joint;
 
   const canvas = document.createElement("canvas");
-  canvas.width = texW;
-  canvas.height = texH;
+  canvas.width = texSize;
+  canvas.height = texSize;
   const ctx = canvas.getContext("2d");
 
-  // фон = раствор
   ctx.fillStyle = mortarColor;
-  ctx.fillRect(0, 0, texW, texH);
+  ctx.fillRect(0, 0, texSize, texSize);
 
   ctx.fillStyle = brickColor;
+  for (let yCount = 0; yCount < countY; yCount++) {
+    const y = yCount * stepY;
+    const isOffsetRow = layout === "running" && yCount % 2 !== 0;
 
-  const stepX = brickW + jointThickness;
-  const stepY = brickH + jointThickness;
+    for (let xCount = -1; xCount <= countX; xCount++) {
+      let x = xCount * stepX;
+      if (isOffsetRow) x += stepX / 2;
 
-  const halfOffset = stepX / 2;
+      ctx.fillRect(x, y, brickW, brickH);
 
-  if (layout === "herringbone") {
-    // очень простой вариант "ёлочки": рисуем кирпичи под 45° в двух направлениях
-    // (можно потом усложнить, для начала — достаточно визуального отличия)
-    ctx.save();
-    ctx.translate(texW / 2, texH / 2);
-    ctx.rotate(Math.PI / 4);
-
-    for (let y = -texH; y < texH; y += stepY) {
-      for (let x = -texW; x < texW; x += stepX) {
-        ctx.fillRect(x, y, brickW, brickH);
-      }
-    }
-
-    ctx.rotate(-Math.PI / 2);
-    for (let y = -texH; y < texH; y += stepY) {
-      for (let x = -texW; x < texW; x += stepX) {
-        ctx.fillRect(x, y, brickW, brickH);
-      }
-    }
-
-    ctx.restore();
-  } else {
-    // running / stack
-    for (let y = 0, row = 0; y < texH + stepY; y += stepY, row++) {
-      let offsetX = 0;
-
-      if (layout === "running") {
-        // чётный/нечётный ряд — смещаем на половину кирпича
-        offsetX = (row % 2 === 0) ? 0 : halfOffset;
-      } else if (layout === "stack") {
-        offsetX = 0;
-      }
-
-      for (let x = -stepX; x < texW + stepX; x += stepX) {
-        const brickX = x + offsetX;
-
-        ctx.fillRect(
-          brickX,
-          y,
-          brickW,
-          brickH
-        );
+      // Заплатка для смещения на краях
+      if (isOffsetRow && xCount === countX - 1) {
+        ctx.fillRect(x - texSize, y, brickW, brickH);
       }
     }
   }
-
   return canvas;
 }
 
@@ -625,7 +631,7 @@ function buildBrickCanvasTexture(params) {
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
 
-  // Масштаб повторения по UV (подбирается экспериментально)
+  // Масштаб повторения по UV
   tex.repeat.set(1, 1);
 
   tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -634,21 +640,37 @@ function buildBrickCanvasTexture(params) {
   return tex;
 }
 
-// ===== Применение/откат материалов на модель =====
+// Применение/откат материалов на модель
 function restoreOriginalTargetMaterial() {
   const targetMat = modelMaterials.get(TARGET_MATERIAL_NAME);
   if (!targetMat) return;
 
   if (!originalTargetMaterial) {
     // Нечего откатывать — просто очистим карты
-    const blankKeys = ["map","normalMap","metalnessMap","roughnessMap","aoMap","emissiveMap","bumpMap","displacementMap","alphaMap","lightMap"];
-    blankKeys.forEach(k => { if (targetMat[k]) { targetMat[k].dispose?.(); targetMat[k] = null; } });
+    const blankKeys = [
+      "map",
+      "normalMap",
+      "metalnessMap",
+      "roughnessMap",
+      "aoMap",
+      "emissiveMap",
+      "bumpMap",
+      "displacementMap",
+      "alphaMap",
+      "lightMap",
+    ];
+    blankKeys.forEach((k) => {
+      if (targetMat[k]) {
+        targetMat[k].dispose?.();
+        targetMat[k] = null;
+      }
+    });
     targetMat.needsUpdate = true;
     statusEl.textContent = `Нет точного совпадения. Показана исходная модель (без текстуры на "${TARGET_MATERIAL_NAME}").`;
     return;
   }
 
-  // Откат: переносим все свойства из сохранённой копии
+  // Переносим все свойства из сохранённой копии
   const restored = deepCloneMaterial(originalTargetMaterial);
 
   // Перезапишем свойствами существующий объект материала, чтобы не лезть в mesh.material = ...
@@ -662,55 +684,123 @@ function restoreOriginalTargetMaterial() {
 
   statusEl.textContent = `Нет точного совпадения. Показана исходная модель (без текстуры на "${TARGET_MATERIAL_NAME}").`;
 }
+function setupWorldUV(material, brickScale = 1.0, offset = { x: 0, y: 0 }) {
+  // Храним данные в userData, чтобы иметь к ним доступ извне
+  material.userData.uBrickScale = { value: brickScale };
+  material.userData.uOffset = { value: new THREE.Vector2(offset.x, offset.y) };
 
-// ПРОЦЕДУРНОЕ применение текстуры к TARGET_MATERIAL_NAME
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uBrickScale = material.userData.uBrickScale;
+    shader.uniforms.uOffset = material.userData.uOffset;
+
+    shader.vertexShader = `
+          varying vec3 vWorldPos;
+          varying vec3 vWorldNormal;
+          ${shader.vertexShader}
+      `.replace(
+      `#include <worldpos_vertex>`,
+      `#include <worldpos_vertex>
+           vWorldPos = worldPosition.xyz;
+           vWorldNormal = normalize( transformDirection( normal, modelMatrix ) );`
+    );
+
+    shader.fragmentShader = `
+          varying vec3 vWorldPos;
+          varying vec3 vWorldNormal;
+          uniform float uBrickScale;
+          uniform vec2 uOffset;
+          ${shader.fragmentShader}
+      `.replace(
+      `#include <map_fragment>`,
+      `
+          #ifdef USE_MAP
+              vec3 blending = abs(vWorldNormal);
+              blending = pow(blending, vec3(50.0)); // Максимальная резкость швов
+              blending /= (blending.x + blending.y + blending.z);
+
+              // Применяем масштаб и смещение
+              vec2 coordsX = vWorldPos.zy * uBrickScale + uOffset;
+              vec2 coordsY = vWorldPos.xz * uBrickScale + uOffset;
+              vec2 coordsZ = vWorldPos.xy * uBrickScale + uOffset;
+
+              vec4 xProj = texture2D(map, coordsX);
+              vec4 yProj = texture2D(map, coordsY);
+              vec4 zProj = texture2D(map, coordsZ);
+
+              diffuseColor *= xProj * blending.x + yProj * blending.y + zProj * blending.z;
+          #endif
+          `
+    );
+  };
+  material.needsUpdate = true;
+}
+/**
+ * Основная функция применения текстуры к целевому материалу
+ * @param {Object} matchedCfg - Конфигурация из TEXTURES_CONFIG (теги и параметры)
+ */
 function applyMatchedTextureToTarget(matchedCfg) {
-  if (!matchedCfg) return;
+  if (!matchedCfg) {
+    console.warn("Конфигурация текстуры не найдена");
+    return;
+  }
 
+  // 1. Ищем нужный материал в загруженной модели
   const targetMat = modelMaterials.get(TARGET_MATERIAL_NAME);
   if (!targetMat) {
     statusEl.textContent = `Материал "${TARGET_MATERIAL_NAME}" не найден в модели.`;
     return;
   }
 
-  // Удаляем старую карту, чтобы не было утечек
+  // 2. Очистка старой текстуры для экономии памяти
   if (targetMat.map) {
-    targetMat.map.dispose?.();
+    targetMat.map.dispose();
     targetMat.map = null;
   }
 
+  // 3. Подготовка параметров из тегов
   const tags = matchedCfg.tags || {};
-
-  // Базовые параметры — из тегов
   const [brickW, brickH] = mapBrickPixelSize(tags.size || "");
-  const paramsFromTags = {
+
+  const canvasParams = {
     brickColor: mapBrickColor(tags.color_brick || "red"),
     mortarColor: mapMortarColor(tags.color_rastvor || "gray"),
     layout: tags.layout || "running",
     brickPixelSize: [brickW, brickH],
-    textureSize: [1024, 1024],
-    jointThickness: 4
+    jointThickness: 4, // Толщина шва в пикселях на канвасе
+    ...(matchedCfg.params || {}),
   };
 
-  // Дополнительные параметры можно задать в config.json в поле "params"
-  const params = {
-    ...paramsFromTags,
-    ...(matchedCfg.params || {})
-  };
+  // 4. Генерация бесшовного канваса (использует обновленную функцию)
+  const canvas = createBrickCanvas(canvasParams);
+  const tex = new THREE.CanvasTexture(canvas);
 
-  const tex = buildBrickCanvasTexture(params);
+  // ВАЖНО: настройки для корректной работы Triplanar Mapping
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  tex.encoding = THREE.sRGBEncoding; // Чтобы цвета были сочными
+
+  // Присваиваем карту
   targetMat.map = tex;
-
-  // При желании можно чуть подправить базовый цвет материала
-  // (но можно и оставить исходный, чтобы сохранить освещение/тон)
-  // targetMat.color.set(params.brickColor || "#ffffff");
-
   targetMat.needsUpdate = true;
 
-  if (currentModel) currentModel.visible = true;
+  // 5. Настройка параметров отображения (Scale и Offset)
+  // brickScale: сколько метров занимает одна текстура (подбирается под размер дома)
+  // uOffset: смещение (x, y). Помогает подогнать ряд под крышу или фундамент.
+  const brickScale = 0.25;
+  const currentOffset = { x: 0.0, y: 0.12 }; // Попробуй менять Y, чтобы "двигать" ряды
+
+  // Применяем магию шейдера
+  setupWorldUV(targetMat, brickScale, currentOffset);
+
+  // 6. Финализация
+  if (currentModel) {
+    currentModel.visible = true;
+  }
 
   loadEnvironmentOnce();
-  statusEl.textContent = `Применена процедурная текстура к "${TARGET_MATERIAL_NAME}".`;
+  statusEl.textContent = `Текстура применена (Scale: ${brickScale})`;
+  console.log(`Применена текстура: ${matchedCfg.key}`, canvasParams);
 }
 
 // Применяем текущую конфигурацию к уже загруженной модели (или откатываем)
@@ -737,7 +827,7 @@ function applySelectionToLoadedModel() {
   applyMatchedTextureToTarget(matched);
 }
 
-// ===== UI =====
+// UI
 function initModelUI() {
   modelSelect.innerHTML = '<option value="">— Выберите объект —</option>';
   Object.entries(MODELS_CONFIG).forEach(([key, { name }]) => {
@@ -754,13 +844,14 @@ function attachSelectionListeners() {
     // Модель выбирается перед загрузкой, не применяем ничего пока не загрузим
   });
 
-  const attach = (nodes) => nodes.forEach((n) => {
-    n.addEventListener("change", () => {
-      updateLoadAvailability();
-      // Если модель уже загружена — пере-применяем немедленно
-      if (modelLoaded) applySelectionToLoadedModel();
+  const attach = (nodes) =>
+    nodes.forEach((n) => {
+      n.addEventListener("change", () => {
+        updateLoadAvailability();
+        // Если модель уже загружена — пере-применяем немедленно
+        if (modelLoaded) applySelectionToLoadedModel();
+      });
     });
-  });
 
   attach(radiosSize());
   attach(radiosLayout());
@@ -768,11 +859,12 @@ function attachSelectionListeners() {
   attach(radiosColorRastvor());
 }
 
-// ===== Init =====
+// Init
 async function initUI() {
   const configLoaded = await loadConfig();
   if (!configLoaded) {
-    statusEl.textContent = "Ошибка загрузки конфигурации. Проверьте config.json";
+    statusEl.textContent =
+      "Ошибка загрузки конфигурации. Проверьте config.json";
     return;
   }
 
@@ -797,8 +889,12 @@ async function initUI() {
   resetBtn.addEventListener("click", () => {
     // Сброс выпадающих меню и радио-кнопок
     modelSelect.value = "";
-    [...radiosSize(), ...radiosLayout(), ...radiosColorBrick(), ...radiosColorRastvor()]
-      .forEach((r) => (r.checked = false));
+    [
+      ...radiosSize(),
+      ...radiosLayout(),
+      ...radiosColorBrick(),
+      ...radiosColorRastvor(),
+    ].forEach((r) => (r.checked = false));
 
     // Удаляем модель
     unloadCurrentModel();
@@ -821,7 +917,7 @@ if (document.readyState === "loading") {
   initUI();
 }
 
-// Подстраиваем камеру/рендер под КОНКРЕТНЫЙ блок с 3D
+// Подстраиваем камеру/рендер под блок с 3D
 const ro = new ResizeObserver(() => {
   sizeFromContainer();
 });
@@ -829,14 +925,15 @@ ro.observe(container);
 
 function animate() {
   requestAnimationFrame(animate);
-
-  // Страховка: если CSS изменил размер, а наблюдатель не сработал
   const rect = container.getBoundingClientRect();
   const needW = Math.max(1, Math.floor(rect.width));
   const needH = Math.max(1, Math.floor(rect.height));
   const canvas = renderer.domElement;
   const px = renderer.getPixelRatio();
-  if (canvas.width !== Math.floor(needW * px) || canvas.height !== Math.floor(needH * px)) {
+  if (
+    canvas.width !== Math.floor(needW * px) ||
+    canvas.height !== Math.floor(needH * px)
+  ) {
     renderer.setSize(needW, needH, false);
     camera.aspect = needW / needH;
     camera.updateProjectionMatrix();

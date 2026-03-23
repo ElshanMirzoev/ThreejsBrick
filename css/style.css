@@ -1,193 +1,447 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  color-scheme: light dark;
+    --primary: #d35400;
+    --primary-light: #fff4ed;
+    --bg-main: #fcfcfc;
+    --text-dark: #1a1a1a;
+    --text-muted: #666;
+    --border: #e2e8f0;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 10px 25px rgba(0,0,0,0.08);
+    --radius: 12px;
 }
 
-/* Базовые стили страницы (светлая тема) */
 body {
-  margin: 0;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  background-color: #fff;
-  color: #111;
+    margin: 0;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-dark);
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Шапка */
 header {
-  padding: 1px 1px 1px;
-  border-bottom: 1px solid #000;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 20px;
 }
 
 header h1 {
-  font-size: 2em;
-  font-weight: 900;
-  margin:  auto ;
-  text-align: center;
-  color: #111;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 32px;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
 }
 
-#config-panel {
-  color: #111;
-}
-
-/* =========================
-   ПАНЕЛЬ КОНФИГУРАТОРА
-   ========================= */
-
-/* Вся панель настроек */
+/* Панель выбора */
 .panel {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  max-width: 1100px;
-  margin:  auto ;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-/* Общий стиль для fieldset */
-.panel fieldset {
-  margin: 0;                       /* ← добавили это */
-  border: 1px solid rgba(0,0,0,.33);
-  border-radius: 10px;
-  padding: 8px 12px;
-  background: #fff;
+fieldset {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    margin: 0;
 }
 
-/* Ряд с остальными меню (Размер / Вид / Цвет / Раствор) */
+.object-fieldset {
+    background: #fff;
+}
+
+legend {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    padding: 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Сетка параметров */
 .settings-row {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  flex-wrap: nowrap;       /* все в одну строку, пока хватает ширины */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
 }
 
-/* Каждый блок-меню в строке */
-.settings-row fieldset {
-  flex: 1 1 0;
-  min-width: 200px;
+/* Стилизация выпадающего списка */
+#model-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    background-color: #fff;
+    transition: border-color 0.2s;
 }
 
-/* Легенды (заголовки меню) */
-.panel legend {
-  padding: 0 6px;
-  font-weight: 600;
-  opacity: 0.9;
+#model-select:focus {
+    outline: none;
+    border-color: var(--primary);
 }
 
-/* Ряд с селектом объекта и т.п. */
-.row {
-  display: flex;
-  flex-direction: row;
-  gap: 5px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-/* Варианты внутри меню — строго в столбик */
+/* Современные переключатели (плитки) */
 .options {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .options label {
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+    background: #fff;
+    color: var(--text-dark);
 }
 
-/* Селект объекта */
-#model-select {
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid rgba(0,0,0,.33);
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  font-size: 0.95rem;
+.options label:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
 }
 
-/* =========================
-   КНОПКИ ВИЗУАЛИЗАЦИИ
-   ========================= */
+.options input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    margin-right: 12px;
+    position: relative;
+    transition: all 0.2s;
+    background: #fff;
+}
 
+.options input[type="radio"]:checked {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+
+.options input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.options label:has(input:checked) {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+/* Кнопки */
 .actions-row {
-  max-width: 1100px;
-  margin:  auto ;
-  padding: 8px 8px 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
 }
 
 .btn {
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: 1px solid #000;
-  cursor: pointer;
-  background: transparent;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  font-size: 0.95rem;
-  color: #111;
-  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
 }
 
-.btn:hover:not([disabled]) {
-  background: rgba(0,0,0,.06);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0,0,0,.15);
+#loadBtn {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 14px rgba(211, 84, 0, 0.3);
 }
 
-.btn:active:not([disabled]) {
-  transform: scale(0.98);
-  box-shadow: none;
+#loadBtn:hover:not([disabled]) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(211, 84, 0, 0.4);
 }
 
-.btn[disabled] {
-  opacity: 0.5;
-  cursor: not-allowed;
+#loadBtn:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+#resetBtn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+#resetBtn:hover {
+    background: #e2e8f0;
 }
 
 .status-text {
-  font-size: 0.85rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
 }
 
-/* Основной контент */
+/* Область 3D — КОРРЕКЦИЯ */
 main {
-  position: relative;
-  padding: 12px 1px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px 60px;
 }
-
-/* =========================
-   Блок-карточка для 3D сцены
-   ========================= */
 
 .viewer-card {
-  max-width: 1100px;
-  margin:  auto ;  /* <-- ставим ТО ЖЕ ЧИСЛО сверху */
-  border: 1px solid rgba(0,0,0,.28);
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 6px 24px rgba(0,0,0,.08);
-  overflow: hidden;
+    background: #fff;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
 }
 
 .viewer-header {
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(0,0,0,.14);
-  font-weight: 600;
-  color: #111;
-  opacity: .95;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    background: #fafafa;
 }
 
-/* В ЭТОМ БЛОКЕ ЖИВЕТ КАНВАС WebGL */
+/* Убираем жесткий aspect-ratio, чтобы JS сам управлял размером */
 .viewer-canvas {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  min-height: 420px;
-  position: relative;
+    width: 100%;
+    height: 600px; /* Фиксированная высота для стабильности */
+    background: #000;
+    position: relative;
 }
 
-/* Канвас подстраивается под контейнер */
 #container3D canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-  position: static;
-  z-index: 1;
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .settings-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .viewer-canvas {
+        height: 400px;
+    }
+}
+
+/* Переключаем контейнеры цветов в горизонтальный ряд */
+#color-brick-options, #color-rastvor-options {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Стилизуем эти конкретные label как квадраты */
+#color-brick-options label, #color-rastvor-options label {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 8px; /* можно сделать 50% для кружков */
+  position: relative;
+  overflow: hidden;
+  font-size: 0; /* Скрываем текст внутри квадрата */
+  border: 2px solid var(--border);
+}
+
+/* Скрываем стандартный инпут и центрируем состояние "выбрано" */
+#color-brick-options input, #color-rastvor-options input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Назначаем цвета для КИРПИЧА */
+label:has(input[value="red"]) { background-color: #b5372a !important; }
+label:has(input[value="yellow"]) { background-color: #e3b066 !important; }
+label:has(input[value="white"]) { background-color: #f1f1f1 !important; }
+
+/* Назначаем цвета для РАСТВОРА */
+label:has(input[value="gray"]) { background-color: #888888 !important; }
+label:has(input[value="white"]) { background-color: #ffffff !important; }
+
+/* Состояние при наведении */
+#color-brick-options label:hover, #color-rastvor-options label:hover {
+  transform: scale(1.1);
+  border-color: var(--primary);
+}
+
+/* Индикация выбранного цвета (белая рамка внутри + темная снаружи) */
+#color-brick-options label:has(input:checked), 
+#color-rastvor-options label:has(input:checked) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 3px #fff, var(--shadow-md);
+  transform: scale(1.05);
+}
+
+/* Чтобы пользователь не запутался, добавим название цвета при наведении */
+#color-brick-options label::after, #color-rastvor-options label::after {
+  content: attr(title); /* Если добавите title="Красный" в HTML */
+  position: absolute;
+  bottom: -25px;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* Универсальная сетка для всех рядов выбора */
+.options {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Общий стиль квадрата для всех типов выбора */
+.options label {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #fff;
+  position: relative;
+  font-size: 0; /* Скрываем текст, оставляем только визуал */
+}
+
+/* Скрываем стандартные радио-кнопки */
+.options input[type="radio"] {
+  display: none;
+}
+
+/* Ховер и активное состояние для всех */
+.options label:hover {
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.options label:has(input:checked) {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  box-shadow: inset 0 0 0 2px #fff, var(--shadow-sm);
+}
+
+/* --- 1. ЦВЕТА (Заливка) --- */
+label:has(input[value="red"]) { background-color: #b5372a !important; }
+label:has(input[value="yellow"]) { background-color: #e3b066 !important; }
+label:has(input[value="white"]) { background-color: #f1f1f1 !important; }
+label:has(input[value="gray"]) { background-color: #888888 !important; }
+
+/* --- 2. РАЗМЕРЫ И КЛАДКА (Иконки/Схемы) --- */
+
+/* Общий стиль для иконок внутри квадратов */
+#size-options label::before, 
+#layout-options label::before {
+  content: "";
+  width: 32px;
+  height: 32px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: grayscale(1); /* Делаем иконки нейтральными до выбора */
+  opacity: 0.6;
+}
+
+label:has(input:checked)::before {
+  filter: grayscale(0);
+  opacity: 1;
+}
+
+/* ПРИМЕРЫ СХЕМ КЛАДКИ (можно временно сделать через CSS-паттерны) */
+
+/* Кладка 1 (Ложковая) - имитация линиями */
+label:has(input[value="running"])::before {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="none"/><path d="M0 10h40M0 30h40M20 10v20M0 30v10M40 30v10" stroke="black" stroke-width="2"/></svg>');
+}
+
+/* Кладка 2 (Шов в шов) */
+label:has(input[value="stack"])::before {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="none" stroke="black" stroke-width="2"/><path d="M0 20h40M20 0v40" stroke="black" stroke-width="2"/></svg>');
+}
+
+/* Кладка 3 (Ёлочка) */
+label:has(input[value="herringbone"])::before {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><path d="M0 40L40 0M0 20L20 0M20 40L40 20" stroke="black" stroke-width="2"/></svg>');
+}
+
+/* РАЗМЕРЫ (Схематичные кирпичи разной высоты) */
+label:has(input[value="250x120x65"])::before {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect x="5" y="15" width="30" height="10" fill="none" stroke="black" stroke-width="2"/></svg>');
+}
+label:has(input[value="250x120x88"])::before {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect x="5" y="10" width="30" height="20" fill="none" stroke="black" stroke-width="2"/></svg>');
+}
+
+.actions-row {
+    display: flex;
+    justify-content: center; /* Центрируем кнопки под палитрой */
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.btn {
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+#loadBtn {
+    background-color: var(--text-dark); /* Черная кнопка выглядит солиднее */
+    color: white;
+    border: 2px solid var(--text-dark);
+}
+
+#loadBtn:hover:not([disabled]) {
+    background-color: var(--primary); /* При наведении становится кирпичной */
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+#resetBtn {
+    background-color: transparent;
+    color: var(--text-muted);
+    border: 2px solid var(--border);
+}
+
+#resetBtn:hover {
+    border-color: var(--text-dark);
+    color: var(--text-dark);
 }
