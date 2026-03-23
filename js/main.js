@@ -562,6 +562,8 @@ function mapBrickColor(tagColor) {
       return "#A8854FFF";
     case "white":
       return "#D4D4D4FF";
+    case "black":
+      return "#2c2c2c";
     default:
       return "#fff";
   }
@@ -569,7 +571,7 @@ function mapBrickColor(tagColor) {
 
 function mapMortarColor(tagColor) {
   switch (tagColor) {
-    case "gray":
+    case "black":
       return "#0B0B0BFF";
     case "white":
       return "#A7A7A7FF";
@@ -787,7 +789,7 @@ function applyMatchedTextureToTarget(matchedCfg) {
 
   const canvasParams = {
     brickColor: mapBrickColor(tags.color_brick || "red"),
-    mortarColor: mapMortarColor(tags.color_rastvor || "gray"),
+    mortarColor: mapMortarColor(tags.color_rastvor || "black"),
     layout: tags.layout || "running",
     brickPixelSize: [brickW, brickH],
     jointThickness: 4, // Толщина шва в пикселях на канвасе

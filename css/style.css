@@ -284,9 +284,10 @@ main {
 label:has(input[value="red"]) { background-color: #b5372a !important; }
 label:has(input[value="yellow"]) { background-color: #e3b066 !important; }
 label:has(input[value="white"]) { background-color: #f1f1f1 !important; }
+label:has(input[value="black"]) { background-color: #2c2c2c !important; }
 
 /* Назначаем цвета для РАСТВОРА */
-label:has(input[value="gray"]) { background-color: #888888 !important; }
+label:has(input[value="black"]) { background-color: #888888 !important; }
 label:has(input[value="white"]) { background-color: #ffffff !important; }
 
 /* Состояние при наведении */
