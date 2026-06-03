@@ -83,3 +83,13 @@ coverage/
 .cache-loader/
 __pycache__/
 tmp/
+
+
+
+# Игнорируем тяжелые 3D модели и текстуры к ним
+models/
+textures/
+*.gltf
+*.bin
+*.blend
+*.blend1
