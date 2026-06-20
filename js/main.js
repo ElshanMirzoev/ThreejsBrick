@@ -564,6 +564,14 @@ function mapBrickColor(tagColor) {
       return "#D4D4D4FF";
     case "black":
       return "#2c2c2c";
+    case "orange":
+      return "#e66a15"; // Кирпичный оранжевый
+    case "gray":
+      return "#7f7f7f"; // Серый силикатный/бетонный
+    case "blue":
+      return "#1a52ad"; // Синий
+    case "green":
+      return "#1b7337"; // Зеленый
     default:
       return "#fff";
   }
@@ -593,7 +601,7 @@ function mapBrickPixelSize(sizeTag) {
 }
 
 // Генератор canvas-текстуры кирпичной кладки
-function createBrickCanvas(params) {
+export function createBrickCanvas(params) {
   const texSize = 1024;
   const {
     brickColor = "#b5372a",
@@ -603,10 +611,8 @@ function createBrickCanvas(params) {
 
   const targetStepY = params.brickPixelSize[1] + params.jointThickness;
 
-  // ГЛАВНОЕ ИСПРАВЛЕНИЕ:
-  // Находим ближайшее ЧЕТНОЕ число рядов
   let countY = Math.round(texSize / targetStepY);
-  if (countY % 2 !== 0) countY++; // Если нечетное — прибавляем 1
+  if (countY % 2 !== 0) countY++;
 
   const stepY = texSize / countY;
 
@@ -627,19 +633,128 @@ function createBrickCanvas(params) {
   ctx.fillRect(0, 0, texSize, texSize);
 
   ctx.fillStyle = brickColor;
+  
   for (let yCount = 0; yCount < countY; yCount++) {
     const y = yCount * stepY;
-    const isOffsetRow = layout === "running" && yCount % 2 !== 0;
 
-    for (let xCount = -1; xCount <= countX; xCount++) {
-      let x = xCount * stepX;
-      if (isOffsetRow) x += stepX / 2;
+    // КЛАДКА 2: 3 ряда ложковых, 1 ряд тычковый (Пачка из 4 рядов)
+    if (layout === "multirow") {
+      // ИСПРАВЛЕНО: Возвращаем проверку на каждые 4 ряда (индексы 3, 7, 11...)
+      const isHeaderRow = (yCount % 4 === 3); 
 
-      ctx.fillRect(x, y, brickW, brickH);
+      const targetStepX = params.brickPixelSize[0] + params.jointThickness;
+      const countX = Math.round(texSize / targetStepX);
+      const stepX = texSize / countX; 
+      const brickW = stepX - joint;
 
-      // Заплатка для смещения на краях
-      if (isOffsetRow && xCount === countX - 1) {
-        ctx.fillRect(x - texSize, y, brickW, brickH);
+      const headerStepX = stepX / 2;
+      const headerBrickW = headerStepX - joint;
+      const headerCountX = countX * 2;
+
+      if (isHeaderRow) {
+        const headerRowOffset = stepX * 0.25 - joint / 2;
+
+        for (let xCount = -2; xCount <= headerCountX + 2; xCount++) {
+          let x = xCount * headerStepX + headerRowOffset;
+
+          if (x < 0 && x + headerBrickW > 0 && (x + headerBrickW) < (headerBrickW * 0.3)) {
+            x -= (headerBrickW * 0.5); 
+          }
+
+          ctx.fillRect(x, y, headerBrickW, brickH);
+
+          if (x + headerBrickW > texSize) ctx.fillRect(x - texSize, y, headerBrickW, brickH);
+          if (x < 0) ctx.fillRect(x + texSize, y, headerBrickW, brickH);
+        }
+      } else {
+        // ИСПРАВЛЕНО: Индекс ложка внутри пачки из 4 рядов
+        const spoonIndex = yCount % 4; 
+        
+        // Перевязка для 3 ложковых рядов: только средний ряд (1) смещается
+        let spoonOffset = -joint / 2;
+        if (spoonIndex === 1) {
+          spoonOffset += stepX * 0.5;
+        }
+
+        for (let xCount = -2; xCount <= countX + 2; xCount++) {
+          let x = xCount * stepX + spoonOffset;
+
+          if (x < 0 && x + brickW > 0 && (x + brickW) < (brickW * 0.3)) {
+            x -= (brickW * 0.5);
+          }
+
+          ctx.fillRect(x, y, brickW, brickH);
+
+          if (x + brickW > texSize) ctx.fillRect(x - texSize, y, brickW, brickH);
+          if (x < 0) ctx.fillRect(x + texSize, y, brickW, brickH);
+        }
+      }
+    }
+
+    // КЛАДКА 3: 5 рядов ложковых, 1 ряд тычковый (Пачка из 6 рядов)
+    else if (layout === "multirow_5_1") {
+      const isHeaderRow = (yCount % 6 === 5); 
+
+      const targetStepX = params.brickPixelSize[0] + params.jointThickness;
+      const countX = Math.round(texSize / targetStepX);
+      const stepX = texSize / countX; 
+      const brickW = stepX - joint;
+
+      const headerStepX = stepX / 2;
+      const headerBrickW = headerStepX - joint;
+      const headerCountX = countX * 2;
+
+      if (isHeaderRow) {
+        const headerRowOffset = stepX * 0.25 - joint / 2;
+
+        for (let xCount = -2; xCount <= headerCountX + 2; xCount++) {
+          let x = xCount * headerStepX + headerRowOffset;
+
+          if (x < 0 && x + headerBrickW > 0 && (x + headerBrickW) < (headerBrickW * 0.3)) {
+            x -= (headerBrickW * 0.5); 
+          }
+
+          ctx.fillRect(x, y, headerBrickW, brickH);
+
+          if (x + headerBrickW > texSize) ctx.fillRect(x - texSize, y, headerBrickW, brickH);
+          if (x < 0) ctx.fillRect(x + texSize, y, headerBrickW, brickH);
+        }
+      } else {
+        const spoonIndex = yCount % 6; 
+        
+        let spoonOffset = -joint / 2;
+        if (spoonIndex === 1 || spoonIndex === 3) {
+          spoonOffset += stepX * 0.5;
+        }
+
+        for (let xCount = -2; xCount <= countX + 2; xCount++) {
+          let x = xCount * stepX + spoonOffset;
+
+          if (x < 0 && x + brickW > 0 && (x + brickW) < (brickW * 0.3)) {
+            x -= (brickW * 0.5);
+          }
+
+          ctx.fillRect(x, y, brickW, brickH);
+
+          if (x + brickW > texSize) ctx.fillRect(x - texSize, y, brickW, brickH);
+          if (x < 0) ctx.fillRect(x + texSize, y, brickW, brickH);
+        }
+      }
+    }
+
+    else {
+      // Старая ложковая логика (running, stack, herringbone)
+      const isOffsetRow = layout === "running" && yCount % 2 !== 0;
+
+      for (let xCount = -1; xCount <= countX; xCount++) {
+        let x = xCount * stepX;
+        if (isOffsetRow) x += stepX / 2;
+
+        ctx.fillRect(x, y, brickW, brickH);
+
+        if (isOffsetRow && xCount === countX - 1) {
+          ctx.fillRect(x - texSize, y, brickW, brickH);
+        }
       }
     }
   }
@@ -869,14 +984,13 @@ function initModelUI() {
 function attachSelectionListeners() {
   modelSelect.addEventListener("change", () => {
     updateLoadAvailability();
-    // Модель выбирается перед загрузкой, не применяем ничего пока не загрузим
   });
 
   const attach = (nodes) =>
     nodes.forEach((n) => {
       n.addEventListener("change", () => {
         updateLoadAvailability();
-        // Если модель уже загружена — пере-применяем немедленно
+        // Вот эта строка отвечает за авто-обновление 3D на лету:
         if (modelLoaded) applySelectionToLoadedModel();
       });
     });

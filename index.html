@@ -33,26 +33,26 @@
           </fieldset>
 
           <!-- Вид кладки -->
-          <fieldset>
-            <legend>Вид кладки</legend>
-            <div class="options" id="layout-options">
-              <label><input type="radio" name="layout" value="running" /> Кладка 1</label>
-        <!--  <label><input type="radio" name="layout" value="stack" /> Кладка 2</#label>
-              <label><input type="radio" name="layout" value="herringbone" /> Кладка 3</label>  -->
-            </div>
-          </fieldset>
-
-          <!-- Цвет кирпича -->
-          <fieldset>
-            <legend>Цвет кирпича</legend>
-            <div class="options" id="color-brick-options">
-              <label><input type="radio" name="color_brick" value="red" /></label>
-              <label><input type="radio" name="color_brick" value="yellow" /></label>
-              <label><input type="radio" name="color_brick" value="white" /></label>
-              <label><input type="radio" name="color_brick" value="black" /></label>
-            </div>
-          </fieldset>
-
+            <fieldset>
+              <legend>Вид кладки</legend>
+              <div class="options" id="layout-options">
+                <label title="Ложковая"><input type="radio" name="layout" value="running" /> Кладка 1</label>
+                <label title="Многорядная (3+1)"><input type="radio" name="layout" value="multirow" /> Кладка 2</label>
+                <label title="Шестирядная (5+1)"><input type="radio" name="layout" value="multirow_5_1" /> Кладка 3</label> </div>
+            </fieldset>          <!-- Цвет кирпича -->
+            <fieldset>
+              <legend>Цвет кирпича</legend>
+              <div class="options" id="color-brick-options">
+                <label title="Красный"><input type="radio" name="color_brick" value="red" /></label>
+                <label title="Жёлтый"><input type="radio" name="color_brick" value="yellow" /></label>
+                <label title="Белый"><input type="radio" name="color_brick" value="white" /></label>
+                <label title="Чёрный"><input type="radio" name="color_brick" value="black" /></label>
+                <label title="Оранжевый"><input type="radio" name="color_brick" value="orange" /></label>
+                <label title="Серый"><input type="radio" name="color_brick" value="gray" /></label>
+                <label title="Синий"><input type="radio" name="color_brick" value="blue" /></label>
+                <label title="Зеленый"><input type="radio" name="color_brick" value="green" /></label>
+              </div>
+            </fieldset>
           <!-- Цвет раствора -->
           <fieldset>
             <legend>Цвет раствора</legend>
@@ -67,19 +67,24 @@
       <!-- Кнопки ниже всех меню -->
       <div class="actions-row">
         <button id="loadBtn" class="btn" disabled>Визуализация</button>
-        <button id="resetBtn" class="btn" type="button">Сброс</button>
+        <button id="view2DBtn" class="btn" type="button" disabled>2D Просмотр</button> <button id="resetBtn" class="btn" type="button">Сброс</button>
         <span id="status" aria-live="polite" class="status-text"></span>
       </div>
     </header>
 
     <main>
-      <!-- Карточка-просмотрщик 3D -->
-      <div class="viewer-card">
-        <div class="viewer-header">Визуализация дома</div>
+      <div class="viewer-card" id="card3D">
+        <div class="viewer-header">Визуализация дома (3D)</div>
         <div id="container3D" class="viewer-canvas" role="region" aria-label="3D-сцена"></div>
+      </div>
+
+      <div class="viewer-card" id="card2D" style="display: none; margin-top: 20px;">
+        <div class="viewer-header">Плоская текстура кладки (2D)</div>
+        <div id="container2D" style="width: 100%; height: 600px; background: #fafafa; display: flex; align-items: center; justify-content: center; overflow: hidden;"></div>
       </div>
     </main>
 
     <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/view2d.js"></script> </body>
   </body>
 </html>

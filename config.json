@@ -412,6 +412,316 @@
         "color_brick": "black",
         "color_rastvor": "white"
       }
+    },
+
+
+    "brick_running_65_orange_black": {
+      "name": "Кладка 1 • 250×120×65 • Оранжевый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "running", "color_brick": "orange", "color_rastvor": "black" }
+    },
+    "brick_running_65_orange_white": {
+      "name": "Кладка 1 • 250×120×65 • Оранжевый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "running", "color_brick": "orange", "color_rastvor": "white" }
+    },
+    "brick_running_65_gray_black": {
+      "name": "Кладка 1 • 250×120×65 • Серый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "running", "color_brick": "gray", "color_rastvor": "black" }
+    },
+    "brick_running_65_gray_white": {
+      "name": "Кладка 1 • 250×120×65 • Серый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "running", "color_brick": "gray", "color_rastvor": "white" }
+    },
+    "brick_running_65_blue_black": {
+      "name": "Кладка 1 • 250×120×65 • Синий • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "running", "color_brick": "blue", "color_rastvor": "black" }
+    },
+    "brick_running_65_blue_white": {
+      "name": "Кладка 1 • 250×120×65 • Синий • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "running", "color_brick": "blue", "color_rastvor": "white" }
+    },
+    "brick_running_65_green_black": {
+      "name": "Кладка 1 • 250×120×65 • Зеленый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "running", "color_brick": "green", "color_rastvor": "black" }
+    },
+    "brick_running_65_green_white": {
+      "name": "Кладка 1 • 250×120×65 • Зеленый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "running", "color_brick": "green", "color_rastvor": "white" }
+    },
+    "brick_running_88_orange_black": {
+      "name": "Кладка 1 • 250×120×88 • Оранжевый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "running", "color_brick": "orange", "color_rastvor": "black" }
+    },
+    "brick_running_88_orange_white": {
+      "name": "Кладка 1 • 250×120×88 • Оранжевый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "running", "color_brick": "orange", "color_rastvor": "white" }
+    },
+    "brick_running_88_gray_black": {
+      "name": "Кладка 1 • 250×120×88 • Серый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "running", "color_brick": "gray", "color_rastvor": "black" }
+    },
+    "brick_running_88_gray_white": {
+      "name": "Кладка 1 • 250×120×88 • Серый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "running", "color_brick": "gray", "color_rastvor": "white" }
+    },
+    "brick_running_88_blue_black": {
+      "name": "Кладка 1 • 250×120×88 • Синий • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "running", "color_brick": "blue", "color_rastvor": "black" }
+    },
+    "brick_running_88_blue_white": {
+      "name": "Кладка 1 • 250×120×88 • Синий • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "running", "color_brick": "blue", "color_rastvor": "white" }
+    },
+    "brick_running_88_green_black": {
+      "name": "Кладка 1 • 250×120×88 • Зеленый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "running", "color_brick": "green", "color_rastvor": "black" }
+    },
+    "brick_running_88_green_white": {
+      "name": "Кладка 1 • 250×120×88 • Зеленый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "running", "color_brick": "green", "color_rastvor": "white" }
+    },
+
+    "brick_multiRef_65_red_black": {
+      "name": "Кладка Многорядная • 250×120×65 • Красный • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "red", "color_rastvor": "black" }
+    },
+    "brick_multiRef_65_red_white": {
+      "name": "Кладка Многорядная • 250×120×65 • Красный • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "red", "color_rastvor": "white" }
+    },
+    "brick_multiRef_65_yellow_black": {
+      "name": "Кладка Многорядная • 250×120×65 • Жёлтый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "yellow", "color_rastvor": "black" }
+    },
+    "brick_multiRef_65_yellow_white": {
+      "name": "Кладка Многорядная • 250×120×65 • Жёлтый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "yellow", "color_rastvor": "white" }
+    },
+    "brick_multiRef_65_white_black": {
+      "name": "Кладка Многорядная • 250×120×65 • Белый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "white", "color_rastvor": "black" }
+    },
+    "brick_multiRef_65_white_white": {
+      "name": "Кладка Многорядная • 250×120×65 • Белый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "white", "color_rastvor": "white" }
+    },
+    "brick_multiRef_65_orange_black": {
+      "name": "Кладка Многорядная • 250×120×65 • Оранжевый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "orange", "color_rastvor": "black" }
+    },
+    "brick_multiRef_65_orange_white": {
+      "name": "Кладка Многорядная • 250×120×65 • Оранжевый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "orange", "color_rastvor": "white" }
+    },
+    "brick_multiRef_65_gray_black": {
+      "name": "Кладка Многорядная • 250×120×65 • Серый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "gray", "color_rastvor": "black" }
+    },
+    "brick_multiRef_65_gray_white": {
+      "name": "Кладка Многорядная • 250×120×65 • Серый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "gray", "color_rastvor": "white" }
+    },
+    "brick_multiRef_65_blue_black": {
+      "name": "Кладка Многорядная • 250×120×65 • Синий • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "blue", "color_rastvor": "black" }
+    },
+    "brick_multiRef_65_blue_white": {
+      "name": "Кладка Многорядная • 250×120×65 • Синий • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "blue", "color_rastvor": "white" }
+    },
+    "brick_multiRef_65_green_black": {
+      "name": "Кладка Многорядная • 250×120×65 • Зеленый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "green", "color_rastvor": "black" }
+    },
+    "brick_multiRef_65_green_white": {
+      "name": "Кладка Многорядная • 250×120×65 • Зеленый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "green", "color_rastvor": "white" }
+    },
+    "brick_multiRef_88_red_black": {
+      "name": "Кладка Многорядная • 250×120×88 • Красный • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "red", "color_rastvor": "black" }
+    },
+    "brick_multiRef_88_red_white": {
+      "name": "Кладка Многорядная • 250×120×88 • Красный • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "red", "color_rastvor": "white" }
+    },
+    "brick_multiRef_88_yellow_black": {
+      "name": "Кладка Многорядная • 250×120×88 • Жёлтый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "yellow", "color_rastvor": "black" }
+    },
+    "brick_multiRef_88_yellow_white": {
+      "name": "Кладка Многорядная • 250×120×88 • Жёлтый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "yellow", "color_rastvor": "white" }
+    },
+    "brick_multiRef_88_white_black": {
+      "name": "Кладка Многорядная • 250×120×88 • Белый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "white", "color_rastvor": "black" }
+    },
+    "brick_multiRef_88_white_white": {
+      "name": "Кладка Многорядная • 250×120×88 • Белый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "white", "color_rastvor": "white" }
+    },
+    "brick_multiRef_88_orange_black": {
+      "name": "Кладка Многорядная • 250×120×88 • Оранжевый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "orange", "color_rastvor": "black" }
+    },
+    "brick_multiRef_88_orange_white": {
+      "name": "Кладка Многорядная • 250×120×88 • Оранжевый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "orange", "color_rastvor": "white" }
+    },
+    "brick_multiRef_88_gray_black": {
+      "name": "Кладка Многорядная • 250×120×88 • Серый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "gray", "color_rastvor": "black" }
+    },
+    "brick_multiRef_88_gray_white": {
+      "name": "Кладка Многорядная • 250×120×88 • Серый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "gray", "color_rastvor": "white" }
+    },
+    "brick_multiRef_88_blue_black": {
+      "name": "Кладка Многорядная • 250×120×88 • Синий • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "blue", "color_rastvor": "black" }
+    },
+    "brick_multiRef_88_blue_white": {
+      "name": "Кладка Многорядная • 250×120×88 • Синий • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "blue", "color_rastvor": "white" }
+    },
+    "brick_multiRef_88_green_black": {
+      "name": "Кладка Многорядная • 250×120×88 • Зеленый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "green", "color_rastvor": "black" }
+    },
+    "brick_multiRef_88_green_white": {
+      "name": "Кладка Многорядная • 250×120×88 • Зеленый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "green", "color_rastvor": "white" }
+    },
+
+    "brick_multirow51_65_red_black": {
+      "name": "Кладка 3 • 250×120×65 • Красный • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "red", "color_rastvor": "black" }
+    },
+    "brick_multirow51_65_red_white": {
+      "name": "Кладка 3 • 250×120×65 • Красный • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "red", "color_rastvor": "white" }
+    },
+    "brick_multirow51_65_white_black": {
+      "name": "Кладка 3 • 250×120×65 • Белый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "white", "color_rastvor": "black" }
+    },
+    "brick_multirow51_65_white_white": {
+      "name": "Кладка 3 • 250×120×65 • Белый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "white", "color_rastvor": "white" }
+    },
+    "brick_multirow51_65_yellow_black": {
+      "name": "Кладка 3 • 250×120×65 • Жёлтый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "yellow", "color_rastvor": "black" }
+    },
+    "brick_multirow51_65_yellow_white": {
+      "name": "Кладка 3 • 250×120×65 • Жёлтый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "yellow", "color_rastvor": "white" }
+    },
+    "brick_multirow51_88_red_black": {
+      "name": "Кладка 3 • 250×120×88 • Красный • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow_5_1", "color_brick": "red", "color_rastvor": "black" }
+    },
+    "brick_multiRef_65_black_black": {
+      "name": "Кладка Многорядная • 250×120×65 • Чёрный • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "black", "color_rastvor": "black" }
+    },
+    "brick_multiRef_65_black_white": {
+      "name": "Кладка Многорядная • 250×120×65 • Чёрный • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow", "color_brick": "black", "color_rastvor": "white" }
+    },
+    "brick_multiRef_88_black_black": {
+      "name": "Кладка Многорядная • 250×120×88 • Чёрный • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "black", "color_rastvor": "black" }
+    },
+    "brick_multiRef_88_black_white": {
+      "name": "Кладка Многорядная • 250×120×88 • Чёрный • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow", "color_brick": "black", "color_rastvor": "white" }
+    },
+
+    "brick_multirow51_65_orange_black": {
+      "name": "Кладка 3 • 250×120×65 • Оранжевый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "orange", "color_rastvor": "black" }
+    },
+    "brick_multirow51_65_orange_white": {
+      "name": "Кладка 3 • 250×120×65 • Оранжевый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "orange", "color_rastvor": "white" }
+    },
+    "brick_multirow51_65_gray_black": {
+      "name": "Кладка 3 • 250×120×65 • Серый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "gray", "color_rastvor": "black" }
+    },
+    "brick_multirow51_65_gray_white": {
+      "name": "Кладка 3 • 250×120×65 • Серый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "gray", "color_rastvor": "white" }
+    },
+    "brick_multirow51_65_blue_black": {
+      "name": "Кладка 3 • 250×120×65 • Синий • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "blue", "color_rastvor": "black" }
+    },
+    "brick_multirow51_65_blue_white": {
+      "name": "Кладка 3 • 250×120×65 • Синий • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "blue", "color_rastvor": "white" }
+    },
+    "brick_multirow51_65_green_black": {
+      "name": "Кладка 3 • 250×120×65 • Зеленый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "green", "color_rastvor": "black" }
+    },
+    "brick_multirow51_65_green_white": {
+      "name": "Кладка 3 • 250×120×65 • Зеленый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "green", "color_rastvor": "white" }
+    },
+
+    "brick_multirow51_88_orange_black": {
+      "name": "Кладка 3 • 250×120×88 • Оранжевый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow_5_1", "color_brick": "orange", "color_rastvor": "black" }
+    },
+    "brick_multirow51_88_orange_white": {
+      "name": "Кладка 3 • 250×120×88 • Оранжевый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow_5_1", "color_brick": "orange", "color_rastvor": "white" }
+    },
+    "brick_multirow51_88_gray_black": {
+      "name": "Кладка 3 • 250×120×88 • Серый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow_5_1", "color_brick": "gray", "color_rastvor": "black" }
+    },
+    "brick_multirow51_88_gray_white": {
+      "name": "Кладка 3 • 250×120×88 • Серый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow_5_1", "color_brick": "gray", "color_rastvor": "white" }
+    },
+    "brick_multirow51_88_blue_black": {
+      "name": "Кладка 3 • 250×120×88 • Синий • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow_5_1", "color_brick": "blue", "color_rastvor": "black" }
+    },
+    "brick_multirow51_88_blue_white": {
+      "name": "Кладка 3 • 250×120×88 • Синий • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow_5_1", "color_brick": "blue", "color_rastvor": "white" }
+    },
+    "brick_multirow51_88_green_black": {
+      "name": "Кладка 3 • 250×120×88 • Зеленый • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow_5_1", "color_brick": "green", "color_rastvor": "black" }
+    },
+    "brick_multirow51_88_green_white": {
+      "name": "Кладка 3 • 250×120×88 • Зеленый • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow_5_1", "color_brick": "green", "color_rastvor": "white" }
+    },
+    "brick_multirow51_65_black_black": {
+      "name": "Кладка 3 • 250×120×65 • Чёрный • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "black", "color_rastvor": "black" }
+    },
+    "brick_multirow51_65_black_white": {
+      "name": "Кладка 3 • 250×120×65 • Чёрный • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x65", "layout": "multirow_5_1", "color_brick": "black", "color_rastvor": "white" }
+    },
+    "brick_multirow51_88_black_black": {
+      "name": "Кладка 3 • 250×120×88 • Чёрный • Серый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow_5_1", "color_brick": "black", "color_rastvor": "black" }
+    },
+    "brick_multirow51_88_black_white": {
+      "name": "Кладка 3 • 250×120×88 • Чёрный • Белый раствор",
+      "tags": { "type": "brick", "size": "250x120x88", "layout": "multirow_5_1", "color_brick": "black", "color_rastvor": "white" }
     }
+
+
+
+    
   }
 }
