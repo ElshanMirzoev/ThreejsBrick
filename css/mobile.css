@@ -1,0 +1,739 @@
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVE STYLES (ThreejsBrick Configurator)
+   Оптимизация для смартфонов и планшетов (iOS Safari, Android Chrome/Edge)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   БРЕЙКПОИНТ: ПЛАНШЕТЫ И СМАРТФОНЫ (<= 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Глобальный правильный бокс-моделинг для мобильных и сброс тапа */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  header,
+  .site-header {
+    padding: 14px 12px;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  main {
+    margin: 12px auto;
+    padding: 0 12px 18px;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* --- ШАПКА И ЛОГОТИП --- */
+  .site-header__brand {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    width: 100%;
+  }
+
+  .site-header__logo-link {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .site-header__logo {
+    max-width: 230px;
+    width: auto;
+    height: auto;
+    max-height: 48px;
+    object-fit: contain;
+  }
+
+  .site-header__title,
+  header h1 {
+    font-size: clamp(0.95rem, 4.2vw, 1.15rem);
+    line-height: 1.35;
+    letter-spacing: -0.2px;
+    text-align: center;
+    word-break: normal;
+    overflow-wrap: break-word;
+    margin: 0;
+    padding: 0 4px;
+    width: 100%;
+  }
+
+  /* --- ПАНЕЛЬ КОНФИГУРАТОРА --- */
+  .panel {
+    gap: 12px;
+    width: 100%;
+  }
+
+  fieldset {
+    padding: 14px 12px;
+    border-radius: 10px;
+    width: 100%;
+  }
+
+  legend {
+    font-size: 0.8rem;
+    padding: 0 6px;
+    font-weight: 700;
+  }
+
+  /* Выпадающий список выбора объекта — крупный, удобный для пальца (min-height: 44px) */
+  #model-select {
+    min-height: 46px;
+    height: 46px;
+    font-size: 16px; /* Предотвращает автозум в iOS Safari */
+    padding: 10px 14px;
+    border-radius: 8px;
+    width: 100%;
+    background-color: #fff;
+    border: 1.5px solid var(--border);
+  }
+
+  /* Сетка параметров кладки в удобный вертикальный стек */
+  .settings-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  /* Контейнеры опций */
+  .options {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* --- ПЛИТКИ ЦВЕТОВ КИРПИЧА И РАСТВОРА --- */
+  /* Размер увеличен минимум до 40-44px с хорошим отступом */
+  #color-brick-options,
+  #color-rastvor-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+  }
+
+  #color-brick-options label,
+  #color-rastvor-options label {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 8px;
+    border-width: 2px;
+    margin: 0;
+    position: relative;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  /* Скрываем десктопные всплывающие подсказки при тапах */
+  #color-brick-options label:not(:has(input:checked))::after,
+  #color-rastvor-options label:not(:has(input:checked))::after {
+    display: none !important;
+  }
+
+  /* Четкая индикация и галочка у выбранного цвета кирпича/раствора */
+  #color-brick-options label:has(input:checked),
+  #color-rastvor-options label:has(input:checked) {
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 2px #fff, 0 3px 8px rgba(0, 0, 0, 0.4);
+    transform: scale(1.08);
+    z-index: 2;
+  }
+
+  #color-brick-options label:has(input:checked)::after,
+  #color-rastvor-options label:has(input:checked)::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 0.9);
+    opacity: 1 !important;
+    pointer-events: none;
+    bottom: auto;
+    white-space: normal;
+  }
+
+  /* --- РАЗМЕРЫ КИРПИЧА И ВИДЫ КЛАДКИ: КНОПКИ-ЧИПСЫ С ТАЧ-ЗОНОЙ ОТ 40px --- */
+  #size-options label {
+    flex: 1 1 calc(50% - 6px);
+    width: auto;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
+    white-space: nowrap;
+    cursor: pointer;
+    background-color: #fff;
+    border: 2px solid var(--border);
+    transition: all 0.2s ease;
+  }
+
+  #layout-options label {
+    flex: 1 1 calc(33.333% - 8px);
+    min-width: 92px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 8px;
+    white-space: nowrap;
+    cursor: pointer;
+    background-color: #fff;
+    border: 2px solid var(--border);
+    transition: all 0.2s ease;
+  }
+
+  #size-options label::before,
+  #layout-options label::before {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  /* Отключаем дублирующий тултип снизу для чипсов */
+  #size-options label::after,
+  #layout-options label::after {
+    display: none !important;
+  }
+
+  #size-options label:has(input:checked),
+  #layout-options label:has(input:checked) {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+    color: var(--primary);
+    box-shadow: 0 2px 6px rgba(211, 84, 0, 0.15);
+  }
+
+  /* --- ПОЛЗУНОК МАСШТАБА КЛАДКИ НА ВСЮ ШИРИНУ БЛОКА --- */
+  .slider-wrap {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #brick-scale-slider {
+    flex: 1;
+    width: 100%;
+    height: 38px; /* Удобная высота полосы прокрутки для пальца */
+    cursor: pointer;
+  }
+
+  .slider-value {
+    min-width: 40px;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  /* --- 3D И 2D ОКНО ПРОСМОТРА --- */
+  /* Высота ограничена 48vh (min 290px, max 440px), чтобы пользователь мог проскроллить страницу пальцем! */
+  .viewer-canvas,
+  #container3D,
+  #container2D {
+    width: 100% !important;
+    height: 48vh !important;
+    min-height: 290px !important;
+    max-height: 440px !important;
+  }
+
+  .viewer-card {
+    border-radius: 10px;
+    margin-top: 14px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .viewer-header {
+    padding: 11px 16px;
+    font-size: 0.85rem;
+  }
+
+  /* Оверлей-подсказка на мобильных */
+  .viewer-hint-overlay {
+    padding: 16px 20px;
+    font-size: 13px;
+    max-width: 90%;
+    gap: 8px;
+  }
+
+  .viewer-hint-icon {
+    font-size: 28px;
+  }
+
+  /* --- КНОПКИ ДЕЙСТВИЙ (.actions-row) --- */
+  /* Сетка для 3 кнопок: 2 в первом ряду, Сброс на всю ширину во втором */
+  .actions-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+    width: 100%;
+  }
+
+  #resetBtn {
+    grid-column: 1 / -1;
+  }
+
+  .actions-row .btn {
+    width: 100%;
+    min-height: 44px;
+    height: 44px;
+    padding: 8px 6px;
+    font-size: 0.82rem;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .status-text {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 0.82rem;
+    margin-top: 2px;
+  }
+
+  /* --- КОРЗИНА И ПЛАВАЮЩАЯ КНОПКА (FAB) --- */
+  .cart-fab {
+    bottom: 18px;
+    right: 18px;
+    width: 54px;
+    height: 54px;
+    font-size: 1.3rem;
+  }
+
+  .cart-fab__count {
+    min-width: 20px;
+    height: 20px;
+    font-size: 0.72rem;
+  }
+
+  .cart-panel {
+    margin: 16px auto;
+    padding: 0 12px;
+    width: 100%;
+  }
+
+  .cart-panel__row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .cart-panel__row label {
+    width: 100%;
+    font-size: 0.9rem;
+  }
+
+  .cart-panel__row select,
+  .cart-panel__row input {
+    min-height: 44px;
+    height: 44px;
+    font-size: 16px; /* Без автозума на iPhone */
+    width: 100%;
+  }
+
+  .cart-panel__total {
+    margin-left: 0;
+    text-align: right;
+    font-size: 1.05rem;
+    padding: 4px 0;
+  }
+
+  #addToCartBtn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  /* Элементы внутри модалки корзины */
+  .cart-item {
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
+  }
+
+  .cart-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .cart-actions-row .btn,
+  .cart-actions-row a {
+    width: 100%;
+    min-height: 44px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* --- КНОПКИ ОБРАТНОЙ СВЯЗИ --- */
+  .feedback-buttons {
+    margin: 20px auto 40px;
+    padding: 0 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .feedback-buttons .btn {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* --- СЕКЦИЯ: НЕДАВНО ПРОСМОТРЕННЫЕ --- */
+  .viewed-section {
+    margin: 24px auto;
+    padding: 0 12px;
+    width: 100%;
+  }
+
+  .viewed-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .viewed-title {
+    font-size: 1.08rem;
+  }
+
+  .viewed-cards-list {
+    gap: 12px;
+    padding: 6px 2px 14px 2px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  .viewed-card {
+    flex: 0 0 220px;
+    min-width: 210px;
+    max-width: 240px;
+    scroll-snap-align: start;
+  }
+
+  .viewed-card__preview {
+    height: 105px;
+  }
+
+  .viewed-card__brick {
+    width: 110px;
+    height: 46px;
+  }
+
+  /* --- МОДАЛЬНЫЕ ОКНА --- */
+  .modal__content,
+  .modal__content--wide,
+  .modal__content--mosaic,
+  .modal__content--auth {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 16px !important;
+    border-radius: 12px;
+  }
+
+  .modal__close {
+    width: 44px;
+    height: 44px;
+    top: 6px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+  }
+
+  /* Размер шрифта не менее 16px для предотвращения автозума в Safari iOS */
+  .modal input,
+  .modal textarea,
+  .modal select,
+  .checkout-form input,
+  .checkout-form textarea,
+  .checkout-form select,
+  .feedback-form input,
+  .feedback-form textarea,
+  .feedback-form select,
+  .admin-pin-input,
+  #cartQty,
+  #cartColor {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+
+  .modal textarea,
+  .checkout-form textarea,
+  .feedback-form textarea {
+    min-height: 90px;
+  }
+
+  .modal button[type="submit"],
+  .checkout-form button[type="submit"],
+  .feedback-form button[type="submit"] {
+    width: 100%;
+    min-height: 46px;
+    margin-top: 6px;
+  }
+
+  /* --- МОДАЛКА: МОЗАИКА --- */
+  .mosaic-columns {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .mosaic-zone-tabs {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .mosaic-zone-tab {
+    min-height: 44px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .mosaic-presets-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .mosaic-preset-chip {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .mosaic-color-row {
+    padding: 8px 10px;
+  }
+
+  .mosaic-color-checkbox {
+    width: 22px;
+    height: 22px;
+  }
+
+  .mosaic-color-slider {
+    height: 10px;
+  }
+
+  .mosaic-preview-card {
+    width: 100%;
+    max-width: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mosaic-preview-canvas {
+    max-width: 100%;
+    width: 260px;
+    height: auto;
+    aspect-ratio: 260 / 150;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .mosaic-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .mosaic-actions button {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .btn-mosaic:disabled,
+  .btn-mosaic.btn-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* --- МОДАЛКА: ПАНЕЛЬ АДМИНИСТРАТОРА --- */
+  .admin-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .admin-toolbar {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .admin-toolbar button {
+    width: 100%;
+    min-height: 44px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .admin-kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .admin-grid-2col {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .admin-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table {
+    min-width: 520px;
+  }
+
+  /* --- ПОДВАЛ --- */
+  .site-footer {
+    padding: 16px 14px;
+    width: 100%;
+  }
+
+  .site-footer__inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .btn-admin {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   БРЕЙКПОИНТ: КОМПАКТНЫЕ СМАРТФОНЫ (<= 480px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  header,
+  .site-header {
+    padding: 12px 10px;
+  }
+
+  main {
+    margin: 10px auto;
+    padding: 0 10px 16px;
+  }
+
+  .site-header__logo {
+    max-width: 200px;
+    max-height: 42px;
+  }
+
+  .site-header__title,
+  header h1 {
+    font-size: 0.95rem;
+  }
+
+  fieldset {
+    padding: 12px 10px;
+  }
+
+  /* Чипсы видов кладки на узких экранах */
+  #layout-options label {
+    flex: 1 1 calc(50% - 6px);
+    font-size: 0.78rem;
+    padding: 0 6px;
+  }
+
+  /* Плитки выбора на узких экранах */
+  #color-brick-options,
+  #color-rastvor-options {
+    gap: 6px;
+  }
+
+  #color-brick-options label,
+  #color-rastvor-options label {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    min-height: 42px;
+  }
+
+  /* Кнопки действий */
+  .actions-row {
+    gap: 8px;
+  }
+
+  .actions-row .btn {
+    padding: 8px 4px;
+    font-size: 0.76rem;
+  }
+
+  /* Мозаика зоны */
+  .mosaic-zone-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  /* Админ KPI */
+  .admin-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Карточки в блоке недавно просмотренные */
+  .viewed-card {
+    flex: 0 0 195px;
+    min-width: 190px;
+  }
+}

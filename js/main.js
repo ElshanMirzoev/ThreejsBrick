@@ -1,10 +1,8 @@
-// Imports
-import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
-import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/DRACOLoader.js";
-import { KTX2Loader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/KTX2Loader.js";
-import { EXRLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/EXRLoader.js";
+// Imports (100% автономная локальная работа без интернета)
+import * as THREE from "./vendor/three/three.module.js";
+import { OrbitControls } from "./vendor/three/OrbitControls.js";
+import { GLTFLoader } from "./vendor/three/GLTFLoader.js";
+import { EXRLoader } from "./vendor/three/EXRLoader.js";
 
 // DOM
 const container = document.getElementById("container3D");
@@ -62,9 +60,18 @@ let TEXTURES_CONFIG = {};
 
 // Состояние
 let currentModel = null;
+let currentModelKey = null;
 const modelMaterials = new Map(); // name -> THREE.Material
+const originalModelMaterials = new Map(); // name -> deep copy
 let originalTargetMaterial = null; // глубокая копия исходного материала TARGET_MATERIAL_NAME
 let modelLoaded = false;
+
+// Активные настройки для зон фасада (мозаика/цвет)
+const activeZoneTextures = {
+  facade: null,
+  accent: null,
+  plinth: null,
+};
 
 const cameraLimits = {
   minTargetY: null,
@@ -76,59 +83,211 @@ const cameraLimits = {
   maxTargetZ: null,
 };
 
+// Мобильная оптимизация Three.js (плавность 60 FPS без лагов и перегрева)
+function isMobileDevice() {
+  const uaMatch =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+  const widthMatch = window.innerWidth <= 768;
+  return uaMatch || widthMatch;
+}
+
+function getOptimalPixelRatio() {
+  // Ограничение pixelRatio: 1.5 для высокой четкости без перегрузки GPU
+  return Math.min(window.devicePixelRatio || 1, 1.5);
+}
+
 // Three.js: Scene / Camera / Renderer
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xdce7ef); // Приятный небесный фон по умолчанию (гарантирует отсутствие черного/белого мерцания)
+
 const camera = new THREE.PerspectiveCamera(60, 16 / 9, 0.1, 50000);
 camera.position.set(0, 2, 5);
 
-const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+let renderer = null;
+let controls = null;
+let animationFrameId = null;
+let isRecovering = false;
+let recoveryTimer = null;
+let lastContainerWidth = 0;
+let lastContainerHeight = 0;
+let isViewerInViewport = true;
+let pendingRenderFrames = 60;
+
+export function requestRender(frames = 20) {
+  pendingRenderFrames = Math.max(pendingRenderFrames, frames);
+}
+
+function createRenderer() {
+  const r = new THREE.WebGLRenderer({
+    alpha: true,
+    antialias: true,
+    powerPreference: "default",
+    failIfMajorPerformanceCaveat: false,
+  });
+  r.setClearColor(0xdce7ef, 1.0);
+  r.setPixelRatio(getOptimalPixelRatio());
+  if (THREE.sRGBEncoding) r.outputEncoding = THREE.sRGBEncoding;
+  r.shadowMap.enabled = true;
+  r.shadowMap.type = THREE.PCFSoftShadowMap;
+  r.toneMapping = THREE.ACESFilmicToneMapping;
+  r.toneMappingExposure = 0.85;
+
+  r.domElement.addEventListener("webglcontextlost", onContextLost, false);
+  r.domElement.addEventListener("webglcontextrestored", onContextRestored, false);
+
+  return r;
+}
+
+function onContextLost(event) {
+  if (event) event.preventDefault();
+  console.warn("WebGL контекст потерян. Запуск процедуры автовосстановления...");
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+  if (!isRecovering) {
+    isRecovering = true;
+    if (recoveryTimer) clearTimeout(recoveryTimer);
+    recoveryTimer = setTimeout(() => {
+      recoverRenderer();
+      isRecovering = false;
+    }, 200);
+  }
+}
+
+function onContextRestored() {
+  console.log("WebGL контекст восстановлен браузером.");
+  if (isRecovering) return;
+  sizeFromContainer(true);
+  if (!animationFrameId) animate();
+  if (modelLoaded && currentModel) {
+    applySelectionToLoadedModel();
+  }
+}
+
+export function recoverRenderer() {
+  console.log("Автоматическое восстановление WebGLRenderer...");
+  try {
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+
+    // Сохраняем положение камеры и фокус управления
+    const prevTarget = controls ? controls.target.clone() : null;
+    const prevCamPos = camera.position.clone();
+    const prevMinDist = controls ? controls.minDistance : null;
+    const prevMaxDist = controls ? controls.maxDistance : null;
+    const prevMinPolar = controls ? controls.minPolarAngle : null;
+    const prevMaxPolar = controls ? controls.maxPolarAngle : null;
+
+    if (controls) {
+      try {
+        controls.dispose();
+      } catch (e) {}
+      controls = null;
+    }
+
+    if (renderer) {
+      try {
+        if (renderer.domElement) {
+          renderer.domElement.removeEventListener("webglcontextlost", onContextLost);
+          renderer.domElement.removeEventListener("webglcontextrestored", onContextRestored);
+        }
+        renderer.dispose();
+      } catch (e) {
+        console.warn("Ошибка при dispose старого renderer:", e);
+      }
+      if (renderer.domElement && renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
+      renderer = null;
+    }
+
+    // Создаем новый WebGLRenderer и монтируем в контейнер
+    renderer = createRenderer();
+    container.appendChild(renderer.domElement);
+
+    // Восстанавливаем контроллер OrbitControls
+    setupControls();
+
+    // Восстанавливаем сохраненный ракурс камеры и лимиты панорамирования
+    if (prevTarget) {
+      controls.target.copy(prevTarget);
+      camera.position.copy(prevCamPos);
+      if (prevMinDist !== null) controls.minDistance = prevMinDist;
+      if (prevMaxDist !== null) controls.maxDistance = prevMaxDist;
+      if (prevMinPolar !== null) controls.minPolarAngle = prevMinPolar;
+      if (prevMaxPolar !== null) controls.maxPolarAngle = prevMaxPolar;
+      controls.update();
+    } else if (currentModel) {
+      const cfg = currentModelKey ? MODELS_CONFIG[currentModelKey] : null;
+      fitCameraToObject(currentModel, { offset: 1.35, ...(cfg?.camera || {}) });
+    }
+
+    // Сбрасываем кэш размеров и принудительно пересчитываем размер
+    lastContainerWidth = 0;
+    lastContainerHeight = 0;
+    sizeFromContainer(true);
+
+    // Обновляем текстуры окружения и фона для нового WebGL контекста
+    if (scene.background && scene.background.isTexture) {
+      scene.background.needsUpdate = true;
+    }
+    if (scene.environment && scene.environment.isTexture) {
+      scene.environment.needsUpdate = true;
+    }
+
+    // Обновляем буферы геометрии и материалов для нового GPU контекста
+    scene.traverse((node) => {
+      if (node.isMesh) {
+        if (node.geometry) {
+          for (const key in node.geometry.attributes) {
+            node.geometry.attributes[key].needsUpdate = true;
+          }
+          if (node.geometry.index) node.geometry.index.needsUpdate = true;
+        }
+        const mats = Array.isArray(node.material) ? node.material : [node.material];
+        mats.forEach((m) => {
+          if (!m) return;
+          for (const k in m) {
+            if (m[k] && m[k].isTexture) m[k].needsUpdate = true;
+          }
+          m.needsUpdate = true;
+        });
+      }
+    });
+
+    // Запускаем цикл отрисовки
+    animate();
+
+    // Восстанавливаем материалы на загруженной модели
+    if (modelLoaded && currentModel) {
+      applySelectionToLoadedModel();
+    }
+
+    console.log("WebGLRenderer успешно восстановлен и перезапущен.");
+  } catch (err) {
+    console.error("Сбой восстановления WebGLRenderer:", err);
+  }
+}
+
+// Инициализация первичного WebGLRenderer
+renderer = createRenderer();
 container.appendChild(renderer.domElement);
 
-// Тени
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.85;
-
-// Окружение EXR
-const exrLoader = new EXRLoader();
-let envLoaded = false;
-
-// фон / окружение / hdri / трава
-function loadEnvironmentOnce() {
-  if (envLoaded) return;
-
-  exrLoader.setPath("./hdr/");
-  exrLoader.load("lilienstein_1k.exr", (texture) => {
-    texture.mapping = THREE.EquirectangularReflectionMapping;
-    scene.background = texture; // фон
-    scene.environment = texture; // отражения
-    envLoaded = true;
-    void "./hdr/";
-  });
-}
-
-// Установка начального размера по контейнеру
-function sizeFromContainer() {
-  const rect = container.getBoundingClientRect();
-  const w = Math.max(1, Math.floor(rect.width));
-  const h = Math.max(1, Math.floor(rect.height));
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-}
-sizeFromContainer();
-
 // Lights
-const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.9);
 hemi.position.set(0, 20, 0);
 scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xffffff, 0.3);
+
+const sun = new THREE.DirectionalLight(0xffffff, 0.5);
 sun.position.set(10, 25, 15);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
+const shadowSize = 1024;
+sun.shadow.mapSize.set(shadowSize, shadowSize);
 sun.shadow.camera.near = 1;
 sun.shadow.camera.far = 120;
 sun.shadow.camera.left = -40;
@@ -138,31 +297,113 @@ sun.shadow.camera.bottom = -40;
 scene.add(sun);
 
 // Controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.enableRotate = true;
-controls.enableZoom = true;
-controls.enablePan = false;
-controls.screenSpacePanning = true;
-controls.minDistance = 0.1;
-controls.maxDistance = 100000;
+function setupControls() {
+  if (controls) {
+    try {
+      controls.dispose();
+    } catch (e) {}
+  }
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.enableRotate = true;
+  controls.enableZoom = true;
+  controls.enablePan = false;
+  controls.screenSpacePanning = true;
+  controls.minDistance = 0.1;
+  controls.maxDistance = 100000;
+  controls.touches = {
+    ONE: THREE.TOUCH.ROTATE,
+    TWO: THREE.TOUCH.DOLLY_PAN,
+  };
+  controls.addEventListener("change", clampCameraPan);
+  controls.addEventListener("change", () => requestRender(30));
+  controls.addEventListener("start", () => requestRender(60));
+  controls._hasPanClamp = true;
+}
+setupControls();
+
+// Окружение EXR
+const exrLoader = new EXRLoader();
+let envLoaded = false;
+let groundMesh = null;
+let cachedEnvTexture = null;
+
+export function ensureEnvironmentActive() {
+  if (cachedEnvTexture) {
+    scene.background = cachedEnvTexture;
+    scene.environment = cachedEnvTexture;
+    if (groundMesh) groundMesh.visible = true;
+    requestRender(20);
+  } else {
+    loadEnvironmentOnce();
+  }
+}
+
+// фон / окружение / hdri / трава (с защитой от сбоя и запасным оффлайн-освещением)
+function loadEnvironmentOnce() {
+  if (cachedEnvTexture) {
+    ensureEnvironmentActive();
+    return;
+  }
+  if (envLoaded) return;
+
+  exrLoader.setPath("./hdr/");
+  exrLoader.load(
+    "lilienstein_1k.exr",
+    (texture) => {
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+      cachedEnvTexture = texture;
+      scene.background = texture;
+      scene.environment = texture;
+      if (groundMesh) groundMesh.visible = true;
+      envLoaded = true;
+      requestRender(20);
+    },
+    undefined,
+    (err) => {
+      console.warn("EXR фон lilienstein_1k.exr не загружен или не поддерживается GPU. Применяем надежный оффлайн fallback:", err);
+      scene.background = new THREE.Color(0xdce7ef);
+      hemi.intensity = 1.1;
+      sun.intensity = 0.7;
+      envLoaded = true;
+      requestRender(20);
+    }
+  );
+}
+
+// Установка начального размера по контейнеру (с защитой от схлопывания 0x0)
+export function sizeFromContainer(force = false) {
+  if (!container || !renderer) return;
+  const rect = container.getBoundingClientRect();
+  const w = Math.round(rect.width);
+  const h = Math.round(rect.height);
+
+  if (w < 10 || h < 10) {
+    // Контейнер скрыт или схлопнут (например, активен 2D режим)
+    lastContainerWidth = 0;
+    lastContainerHeight = 0;
+    return;
+  }
+
+  if (!force && w === lastContainerWidth && h === lastContainerHeight) {
+    return;
+  }
+
+  lastContainerWidth = w;
+  lastContainerHeight = h;
+
+  const pr = getOptimalPixelRatio();
+  renderer.setPixelRatio(pr);
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  requestRender(10);
+}
+sizeFromContainer(true);
 
 // Loaders
 const loader = new GLTFLoader();
-
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath(
-  "https://cdn.skypack.dev/three@0.129.0/examples/js/libs/draco/"
-);
-loader.setDRACOLoader(dracoLoader);
-
-const ktx2Loader = new KTX2Loader()
-  .setTranscoderPath(
-    "https://cdn.skypack.dev/three@0.129.0/examples/js/libs/basis/"
-  )
-  .detectSupport(renderer);
-loader.setKTX2Loader(ktx2Loader);
 
 // Helpers
 function disposeObject(obj) {
@@ -185,11 +426,16 @@ function disposeObject(obj) {
 }
 
 function unloadCurrentModel() {
+  currentModelKey = null;
   if (!currentModel) return;
   scene.remove(currentModel);
   disposeObject(currentModel);
   currentModel = null;
   modelMaterials.clear();
+  originalModelMaterials.clear();
+  activeZoneTextures.facade = null;
+  activeZoneTextures.accent = null;
+  activeZoneTextures.plinth = null;
   originalTargetMaterial = null;
   modelLoaded = false;
 }
@@ -224,13 +470,17 @@ function logSceneStructure(obj, depth = 0) {
 
 // Красиво кадрируем камеру на объект с настраиваемым ракурсом
 function fitCameraToObject(obj, opts = {}) {
+  const options = typeof opts === "number" ? { offset: opts } : opts;
   const {
-    offset = 1.25,
+    offset = 1.35,
     azimuthDeg = 222,
     startHeightRatio = 0.25,
-    minZoomRatio = 0.57,
-    maxZoomRatio = 1.1,
-  } = opts;
+    minZoomRatio = 0.45,
+    maxZoomRatio = 2.0,
+    minDistance = null,
+    maxDistance = null,
+    near = null,
+  } = options;
 
   const box = new THREE.Box3().setFromObject(obj);
   if (box.isEmpty()) {
@@ -276,15 +526,32 @@ function fitCameraToObject(obj, opts = {}) {
     camera.position.y = minCamY;
   }
 
-  camera.near = Math.max(0.01, baseDistance / 100);
-  camera.far = baseDistance * 10;
+  // Расчет camera.near: защита от срезания геометрии перед камерой
+  if (near !== null) {
+    camera.near = near;
+  } else if (baseDistance > 100) {
+    camera.near = Math.max(0.5, baseDistance / 500);
+  } else {
+    camera.near = 0.1;
+  }
+  camera.far = Math.max(10000, baseDistance * 10);
   camera.updateProjectionMatrix();
 
   // Контроллер
   controls.target.set(center.x, targetY, center.z);
 
-  controls.minDistance = baseDistance * minZoomRatio;
-  controls.maxDistance = baseDistance * maxZoomRatio;
+  // Геометро-безопасная минимальная дистанция (камера не проваливается сквозь стены и столбы)
+  const halfX = size.x * 0.5;
+  const halfZ = size.z * 0.5;
+  const cornerRadius = Math.hypot(halfX, halfZ);
+  const safeMinDist = cornerRadius * 1.10;
+
+  if (minDistance !== null) {
+    controls.minDistance = Math.max(minDistance, safeMinDist);
+  } else {
+    controls.minDistance = Math.max(baseDistance * minZoomRatio, safeMinDist);
+  }
+  controls.maxDistance = maxDistance !== null ? maxDistance : baseDistance * maxZoomRatio;
 
   controls.minPolarAngle = THREE.MathUtils.degToRad(20);
   controls.maxPolarAngle = THREE.MathUtils.degToRad(80);
@@ -445,32 +712,69 @@ function loadModelByKey(key) {
       });
 
       // Ground (приёмник теней)
-      const groundGeo = new THREE.PlaneGeometry(200, 200);
-      // ShadowMaterial делает пол почти прозрачным, но с видимыми тенями
-      const groundMat = new THREE.ShadowMaterial({ opacity: 0.15 });
+      if (!groundMesh) {
+        const groundGeo = new THREE.PlaneGeometry(200, 200);
+        // ShadowMaterial делает пол почти прозрачным, но с видимыми тенями
+        const groundMat = new THREE.ShadowMaterial({ opacity: 0.15 });
+        groundMesh = new THREE.Mesh(groundGeo, groundMat);
+        groundMesh.rotation.x = -Math.PI / 2;
+        groundMesh.position.y = 0;
+        groundMesh.receiveShadow = true;
+        scene.add(groundMesh);
+      }
 
-      const ground = new THREE.Mesh(groundGeo, groundMat);
-      ground.rotation.x = -Math.PI / 2;
-      ground.position.y = 0;
-
-      ground.receiveShadow = true;
-      scene.add(ground);
-
-      // Прячем модель до применения текстуры
-      currentModel.visible = false;
-      fitCameraToObject(currentModel, 1.5);
+      const currentSel = getCurrentSelection();
+      const isReady = allModulesSelected(currentSel);
+      currentModel.visible = isReady;
+      if (groundMesh) groundMesh.visible = isReady;
+      if (isReady) {
+        ensureEnvironmentActive();
+      }
+      fitCameraToObject(currentModel, { offset: 1.35, ...(cfg.camera || {}) });
 
       modelMaterials.clear();
+      originalModelMaterials.clear();
       const mats = extractModelMaterials(currentModel);
-      mats.forEach((mat, name) => modelMaterials.set(name, mat));
+      mats.forEach((mat, name) => {
+        modelMaterials.set(name, mat);
+        originalModelMaterials.set(name, deepCloneMaterial(mat));
+      });
 
-      // Сохраняем исходный материал целевой стены для отката
-      const targetMat = modelMaterials.get(TARGET_MATERIAL_NAME);
-      if (targetMat) {
-        originalTargetMaterial = deepCloneMaterial(targetMat);
-      } else {
-        originalTargetMaterial = null;
-        console.warn(`Материал "${TARGET_MATERIAL_NAME}" не найден в модели.`);
+      // Подготавливаем кирпичные материалы (Bricks026, BricksAccent)
+      ["Bricks026", "BricksAccent"].forEach((matName) => {
+        const mat = modelMaterials.get(matName);
+        if (mat) {
+          const MAP_KEYS = [
+            "map", "normalMap", "bumpMap", "roughnessMap", "metalnessMap",
+            "aoMap", "displacementMap", "emissiveMap", "alphaMap",
+            "lightMap", "specularMap", "envMap",
+          ];
+          MAP_KEYS.forEach((k) => {
+            if (mat[k]) {
+              mat[k].dispose?.();
+              mat[k] = null;
+            }
+          });
+          if (mat.color) mat.color.set(0xffffff);
+          mat.roughness = 0.85;
+          mat.metalness = 0.0;
+          mat.needsUpdate = true;
+        }
+      });
+
+      originalTargetMaterial = originalModelMaterials.get(TARGET_MATERIAL_NAME) || null;
+
+      // Настройка реалистичного архитектурного остекления окон (устраняет просвечивание внутренних пустот/стен)
+      const glassMat = modelMaterials.get("Translucent_Glass_Gray");
+      if (glassMat) {
+        glassMat.transparent = true;
+        glassMat.opacity = 0.88;
+        glassMat.color = new THREE.Color(0x182430); // Глубокий оттенок архитектурного стекла
+        glassMat.roughness = 0.08;
+        glassMat.metalness = 0.90; // Зеркальное отражение неба и окружения
+        if (glassMat.transmission !== undefined) glassMat.transmission = 0.0;
+        glassMat.envMapIntensity = 2.0;
+        glassMat.needsUpdate = true;
       }
 
       console.log(`Найдено материалов: ${modelMaterials.size}`);
@@ -478,8 +782,10 @@ function loadModelByKey(key) {
       for (const name of modelMaterials.keys()) console.log(" -", name);
 
       modelLoaded = true;
+      currentModelKey = key;
       resolve();
     } catch (err) {
+      currentModelKey = null;
       console.error(`Ошибка загрузки модели "${key}":`, err);
       updateStatus("Ошибка загрузки модели", "error");
       alert(`Не удалось загрузить модель "${cfg.name}". ${err.message}`);
@@ -514,9 +820,39 @@ function allModulesSelected(sel) {
   );
 }
 
+function updateModelVisibilityAndHint() {
+  const sel = getCurrentSelection();
+  const ready = allModulesSelected(sel);
+  const hintOverlay = document.getElementById("hintOverlay3D");
+
+  if (hintOverlay) {
+    if (ready) {
+      hintOverlay.classList.add("is-hidden");
+      hintOverlay.style.display = "none";
+    } else {
+      hintOverlay.classList.remove("is-hidden");
+      hintOverlay.style.display = "flex";
+    }
+  }
+
+  if (currentModel) {
+    currentModel.visible = ready;
+  }
+  if (groundMesh) {
+    groundMesh.visible = ready;
+  }
+  if (ready) {
+    ensureEnvironmentActive();
+  }
+  requestRender(20);
+}
+
 function updateLoadAvailability() {
   const sel = getCurrentSelection();
-  loadBtn.disabled = !allModulesSelected(sel);
+  const ready = allModulesSelected(sel);
+  if (loadBtn) loadBtn.disabled = !ready;
+  window.dispatchEvent(new CustomEvent("selection-updated", { detail: { available: ready, selection: sel } }));
+  updateModelVisibilityAndHint();
 }
 
 // Поиск точного совпадения по тегам
@@ -554,30 +890,26 @@ function findExactTextureByTags(selection) {
 }
 
 // Карты цветов/размеров по тегам (для процедурной генерации)
-function mapBrickColor(tagColor) {
+export function mapBrickColor(tagColor) {
   switch (tagColor) {
-    case "red":
-      return "#6c0c16ff";
-    case "yellow":
-      return "#A8854FFF";
-    case "white":
-      return "#D4D4D4FF";
-    case "black":
-      return "#2c2c2c";
-    case "orange":
-      return "#e66a15"; // Кирпичный оранжевый
     case "gray":
-      return "#7f7f7f"; // Серый силикатный/бетонный
-    case "blue":
-      return "#1a52ad"; // Синий
-    case "green":
-      return "#1b7337"; // Зеленый
+      return "#a8b0b8"; // Серо-голубой
+    case "gray2":
+      return "#8f9ba5"; // Тёмно-серый
+    case "pink":
+      return "#e8a89a"; // Розово-персиковый
+    case "peach":
+      return "#f0b8a0"; // Персиковый
+    case "beige":
+      return "#e8d4a8"; // Бежево-кремовый
+    case "cream":
+      return "#f0e8d8"; // Кремово-белый
     default:
-      return "#fff";
+      return "#d4d4d4";
   }
 }
 
-function mapMortarColor(tagColor) {
+export function mapMortarColor(tagColor) {
   switch (tagColor) {
     case "black":
       return "#0B0B0BFF";
@@ -588,7 +920,7 @@ function mapMortarColor(tagColor) {
   }
 }
 
-function mapBrickPixelSize(sizeTag) {
+export function mapBrickPixelSize(sizeTag) {
   // Примитивное различие высоты кирпича по размеру
   switch (sizeTag) {
     case "250x120x88":
@@ -600,49 +932,116 @@ function mapBrickPixelSize(sizeTag) {
   }
 }
 
-// Генератор canvas-текстуры кирпичной кладки
-export function createBrickCanvas(params) {
-  const texSize = 1024;
+// Генератор canvas-текстуры кирпичной кладки сверхвысокого разрешения (2048x2048)
+export function createBrickCanvas(params, existingCanvas = null) {
+  const texSize = existingCanvas ? existingCanvas.width : (params.texSize || 2048);
+  const scaleRatio = texSize / 1024;
   const {
     brickColor = "#b5372a",
     mortarColor = "#bfbfbf",
     layout = "running",
+    mosaicColors = null,
   } = params;
 
-  const targetStepY = params.brickPixelSize[1] + params.jointThickness;
+  const targetStepY = (params.brickPixelSize[1] + params.jointThickness) * scaleRatio;
 
   let countY = Math.round(texSize / targetStepY);
   if (countY % 2 !== 0) countY++;
 
   const stepY = texSize / countY;
 
-  const targetStepX = params.brickPixelSize[0] + params.jointThickness;
+  const targetStepX = (params.brickPixelSize[0] + params.jointThickness) * scaleRatio;
   const countX = Math.round(texSize / targetStepX);
   const stepX = texSize / countX;
 
-  const joint = params.jointThickness;
+  const joint = params.jointThickness * scaleRatio;
   const brickW = stepX - joint;
   const brickH = stepY - joint;
 
-  const canvas = document.createElement("canvas");
-  canvas.width = texSize;
-  canvas.height = texSize;
+  const canvas = existingCanvas || document.createElement("canvas");
+  if (canvas.width !== texSize) canvas.width = texSize;
+  if (canvas.height !== texSize) canvas.height = texSize;
   const ctx = canvas.getContext("2d");
 
+  // Заливка швов базовым цветом раствора
   ctx.fillStyle = mortarColor;
   ctx.fillRect(0, 0, texSize, texSize);
 
-  ctx.fillStyle = brickColor;
+  // Мягкая микротекстура цементного раствора для устранения "пластикового" вида
+  const isLightMortar = mortarColor === "#ffffff" || mortarColor.toLowerCase() === "#a7a7a7" || mortarColor.toLowerCase() === "#fff";
+  ctx.fillStyle = isLightMortar ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.06)";
+  const grainStep = Math.max(2, Math.round(3 * scaleRatio));
+  for (let gy = 0; gy < texSize; gy += grainStep * 2) {
+    for (let gx = 0; gx < texSize; gx += grainStep * 2) {
+      if ((gx * 17 + gy * 31) % 7 < 3) {
+        ctx.fillRect(gx, gy, grainStep, grainStep);
+      }
+    }
+  }
+
+  // Поддержка мозаики
+  const hasMosaic = Array.isArray(mosaicColors) && mosaicColors.length > 1;
+  let cumulative = [];
+  if (hasMosaic) {
+    const totalRatio = mosaicColors.reduce((sum, item) => sum + (Number(item.ratio) || 0), 0);
+    let acc = 0;
+    cumulative = mosaicColors.map((item) => {
+      const r = (totalRatio > 0) ? (Number(item.ratio) || 0) / totalRatio : (1 / mosaicColors.length);
+      acc += r;
+      return { color: item.color, threshold: acc };
+    });
+    if (cumulative.length > 0) {
+      cumulative[cumulative.length - 1].threshold = 1.0;
+    }
+  }
+
+  function getBrickColor(col, row, totalCols) {
+    if (!hasMosaic) {
+      return (Array.isArray(mosaicColors) && mosaicColors.length === 1 && mosaicColors[0]?.color)
+        ? mosaicColors[0].color
+        : brickColor;
+    }
+    const gridX = ((col % totalCols) + totalCols) % totalCols;
+    const gridY = ((row % countY) + countY) % countY;
+    const hash = Math.abs(Math.sin(gridX * 127.1 + gridY * 311.7) * 43758.5453) % 1;
+    for (const item of cumulative) {
+      if (hash <= item.threshold) {
+        return item.color;
+      }
+    }
+    return cumulative[cumulative.length - 1].color;
+  }
+
+  // Отрисовка отдельного кирпича с объемной фаской и светотенью
+  function renderSingleBrick(bx, by, bw, bh, col, row, totalCols) {
+    const baseColor = getBrickColor(col, row, totalCols);
+
+    // 1. Тело кирпича
+    ctx.fillStyle = baseColor;
+    ctx.fillRect(bx, by, bw, bh);
+
+    // 2. Фаска (объемные края)
+    const bevel = Math.max(1, Math.round(2 * scaleRatio));
+
+    // Верхний и левый край: мягкий световой блик (ловит свет)
+    ctx.fillStyle = "rgba(255, 255, 255, 0.16)";
+    ctx.fillRect(bx, by, bw, bevel);
+    ctx.fillRect(bx, by, bevel, bh);
+
+    // Нижний и правый край: мягкая тень от заглубленного шва
+    ctx.fillStyle = "rgba(0, 0, 0, 0.20)";
+    ctx.fillRect(bx, by + bh - bevel, bw, bevel);
+    ctx.fillRect(bx + bw - bevel, by, bevel, bh);
+  }
   
   for (let yCount = 0; yCount < countY; yCount++) {
     const y = yCount * stepY;
 
     // КЛАДКА 2: 3 ряда ложковых, 1 ряд тычковый (Пачка из 4 рядов)
     if (layout === "multirow") {
-      // ИСПРАВЛЕНО: Возвращаем проверку на каждые 4 ряда (индексы 3, 7, 11...)
       const isHeaderRow = (yCount % 4 === 3); 
 
-      const targetStepX = params.brickPixelSize[0] + params.jointThickness;
+      const targetStepX = (params.brickPixelSize[0] + params.jointThickness) * scaleRatio;
       const countX = Math.round(texSize / targetStepX);
       const stepX = texSize / countX; 
       const brickW = stepX - joint;
@@ -661,16 +1060,14 @@ export function createBrickCanvas(params) {
             x -= (headerBrickW * 0.5); 
           }
 
-          ctx.fillRect(x, y, headerBrickW, brickH);
+          renderSingleBrick(x, y, headerBrickW, brickH, xCount, yCount, headerCountX);
 
-          if (x + headerBrickW > texSize) ctx.fillRect(x - texSize, y, headerBrickW, brickH);
-          if (x < 0) ctx.fillRect(x + texSize, y, headerBrickW, brickH);
+          if (x + headerBrickW > texSize) renderSingleBrick(x - texSize, y, headerBrickW, brickH, xCount, yCount, headerCountX);
+          if (x < 0) renderSingleBrick(x + texSize, y, headerBrickW, brickH, xCount, yCount, headerCountX);
         }
       } else {
-        // ИСПРАВЛЕНО: Индекс ложка внутри пачки из 4 рядов
         const spoonIndex = yCount % 4; 
         
-        // Перевязка для 3 ложковых рядов: только средний ряд (1) смещается
         let spoonOffset = -joint / 2;
         if (spoonIndex === 1) {
           spoonOffset += stepX * 0.5;
@@ -683,10 +1080,10 @@ export function createBrickCanvas(params) {
             x -= (brickW * 0.5);
           }
 
-          ctx.fillRect(x, y, brickW, brickH);
+          renderSingleBrick(x, y, brickW, brickH, xCount, yCount, countX);
 
-          if (x + brickW > texSize) ctx.fillRect(x - texSize, y, brickW, brickH);
-          if (x < 0) ctx.fillRect(x + texSize, y, brickW, brickH);
+          if (x + brickW > texSize) renderSingleBrick(x - texSize, y, brickW, brickH, xCount, yCount, countX);
+          if (x < 0) renderSingleBrick(x + texSize, y, brickW, brickH, xCount, yCount, countX);
         }
       }
     }
@@ -695,7 +1092,7 @@ export function createBrickCanvas(params) {
     else if (layout === "multirow_5_1") {
       const isHeaderRow = (yCount % 6 === 5); 
 
-      const targetStepX = params.brickPixelSize[0] + params.jointThickness;
+      const targetStepX = (params.brickPixelSize[0] + params.jointThickness) * scaleRatio;
       const countX = Math.round(texSize / targetStepX);
       const stepX = texSize / countX; 
       const brickW = stepX - joint;
@@ -714,10 +1111,10 @@ export function createBrickCanvas(params) {
             x -= (headerBrickW * 0.5); 
           }
 
-          ctx.fillRect(x, y, headerBrickW, brickH);
+          renderSingleBrick(x, y, headerBrickW, brickH, xCount, yCount, headerCountX);
 
-          if (x + headerBrickW > texSize) ctx.fillRect(x - texSize, y, headerBrickW, brickH);
-          if (x < 0) ctx.fillRect(x + texSize, y, headerBrickW, brickH);
+          if (x + headerBrickW > texSize) renderSingleBrick(x - texSize, y, headerBrickW, brickH, xCount, yCount, headerCountX);
+          if (x < 0) renderSingleBrick(x + texSize, y, headerBrickW, brickH, xCount, yCount, headerCountX);
         }
       } else {
         const spoonIndex = yCount % 6; 
@@ -734,26 +1131,26 @@ export function createBrickCanvas(params) {
             x -= (brickW * 0.5);
           }
 
-          ctx.fillRect(x, y, brickW, brickH);
+          renderSingleBrick(x, y, brickW, brickH, xCount, yCount, countX);
 
-          if (x + brickW > texSize) ctx.fillRect(x - texSize, y, brickW, brickH);
-          if (x < 0) ctx.fillRect(x + texSize, y, brickW, brickH);
+          if (x + brickW > texSize) renderSingleBrick(x - texSize, y, brickW, brickH, xCount, yCount, countX);
+          if (x < 0) renderSingleBrick(x + texSize, y, brickW, brickH, xCount, yCount, countX);
         }
       }
     }
 
     else {
-      // Старая ложковая логика (running, stack, herringbone)
+      // Ложковая логика (running, stack)
       const isOffsetRow = layout === "running" && yCount % 2 !== 0;
 
       for (let xCount = -1; xCount <= countX; xCount++) {
         let x = xCount * stepX;
         if (isOffsetRow) x += stepX / 2;
 
-        ctx.fillRect(x, y, brickW, brickH);
+        renderSingleBrick(x, y, brickW, brickH, xCount, yCount, countX);
 
         if (isOffsetRow && xCount === countX - 1) {
-          ctx.fillRect(x - texSize, y, brickW, brickH);
+          renderSingleBrick(x - texSize, y, brickW, brickH, xCount, yCount, countX);
         }
       }
     }
@@ -767,11 +1164,12 @@ function buildBrickCanvasTexture(params) {
 
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
-
-  // Масштаб повторения по UV
   tex.repeat.set(1, 1);
-
-  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  tex.generateMipmaps = true;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.anisotropy = Math.min(4, renderer?.capabilities?.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 4);
+  tex.encoding = THREE.sRGBEncoding;
   tex.needsUpdate = true;
 
   return tex;
@@ -823,10 +1221,14 @@ function restoreOriginalTargetMaterial() {
   targetMat.roughness = 0.85; // Делаем поверхность шершавой (матовой). Чем выше, тем меньше бликов.
   targetMat.metalness = 0.0; // Кирпич не металл, ставим строго 0.
 
-  statusEl.textContent = `Нет точного совпадения. Показана исходная модель (без текстуры на "${TARGET_MATERIAL_NAME}").`;
+  console.warn(`[Material] Нет точного совпадения. Показана исходная модель (без текстуры на "${TARGET_MATERIAL_NAME}").`);
 }
-function setupWorldUV(material, brickScale = 1.0, offset = { x: 0, y: 0 }) {
-  // Храним данные в userData, чтобы иметь к ним доступ извне
+function setupWorldUV(material, brickScale = 0.25, offset = { x: 0, y: 0.12 }) {
+  if (material.userData.uBrickScale && material.userData.uOffset) {
+    material.userData.uBrickScale.value = brickScale;
+    material.userData.uOffset.value.set(offset.x, offset.y);
+    return;
+  }
   material.userData.uBrickScale = { value: brickScale };
   material.userData.uOffset = { value: new THREE.Vector2(offset.x, offset.y) };
 
@@ -856,7 +1258,7 @@ function setupWorldUV(material, brickScale = 1.0, offset = { x: 0, y: 0 }) {
       `
           #ifdef USE_MAP
               vec3 blending = abs(vWorldNormal);
-              blending = pow(blending, vec3(50.0)); // Максимальная резкость швов
+              blending = pow(blending, vec3(16.0)); // Сбалансированная резкость без ступенчатых пикселей
               blending /= (blending.x + blending.y + blending.z);
 
               // Применяем масштаб и смещение
@@ -879,26 +1281,67 @@ function setupWorldUV(material, brickScale = 1.0, offset = { x: 0, y: 0 }) {
  * Основная функция применения текстуры к целевому материалу
  * @param {Object} matchedCfg - Конфигурация из TEXTURES_CONFIG (теги и параметры)
  */
+/**
+ * Наложение процедурной кирпичной текстуры на конкретный материал по имени
+ */
+export function applyBrickTextureToMaterial(matName, canvasParams, brickScale = 0.25, currentOffset = { x: 0.0, y: 0.12 }) {
+  const targetMat = modelMaterials.get(matName);
+  if (!targetMat) {
+    console.warn(`Материал "${matName}" не найден в модели`);
+    return false;
+  }
+
+  if (targetMat.map) {
+    targetMat.map.dispose?.();
+    targetMat.map = null;
+  }
+
+  const canvas = createBrickCanvas(canvasParams);
+  const tex = new THREE.CanvasTexture(canvas);
+
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.generateMipmaps = true;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.anisotropy = Math.min(16, renderer?.capabilities?.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 16);
+  tex.encoding = THREE.sRGBEncoding;
+  tex.needsUpdate = true;
+
+  targetMat.map = tex;
+  if (targetMat.color) targetMat.color.set(0xffffff);
+  targetMat.roughness = 0.85;
+  targetMat.metalness = 0.0;
+  targetMat.needsUpdate = true;
+
+  setupWorldUV(targetMat, brickScale, currentOffset);
+  ensureEnvironmentActive();
+  targetMat.envMapIntensity = 0.5;
+
+  if (currentModel) {
+    currentModel.visible = true;
+  }
+  return true;
+}
+
+export function getCurrentBrickScale() {
+  const slider = document.getElementById("brick-scale-slider");
+  if (slider && !isNaN(parseFloat(slider.value))) {
+    return parseFloat(slider.value);
+  }
+  return 0.25;
+}
+
+/**
+ * Основная функция применения текстуры к целевому материалу
+ * @param {Object} matchedCfg - Конфигурация из TEXTURES_CONFIG (теги и параметры)
+ */
 function applyMatchedTextureToTarget(matchedCfg) {
   if (!matchedCfg) {
     console.warn("Конфигурация текстуры не найдена");
     return;
   }
 
-  // 1. Ищем нужный материал в загруженной модели
-  const targetMat = modelMaterials.get(TARGET_MATERIAL_NAME);
-  if (!targetMat) {
-    updateStatus("Материал " + TARGET_MATERIAL_NAME + " не найден", "warn");
-    return;
-  }
-
-  // 2. Очистка старой текстуры для экономии памяти
-  if (targetMat.map) {
-    targetMat.map.dispose();
-    targetMat.map = null;
-  }
-
-  // 3. Подготовка параметров из тегов
   const tags = matchedCfg.tags || {};
   const [brickW, brickH] = mapBrickPixelSize(tags.size || "");
 
@@ -907,67 +1350,209 @@ function applyMatchedTextureToTarget(matchedCfg) {
     mortarColor: mapMortarColor(tags.color_rastvor || "black"),
     layout: tags.layout || "running",
     brickPixelSize: [brickW, brickH],
-    jointThickness: 4, // Толщина шва в пикселях на канвасе
+    jointThickness: 4,
     ...(matchedCfg.params || {}),
   };
 
-  // 4. Генерация бесшовного канваса (использует обновленную функцию)
-  const canvas = createBrickCanvas(canvasParams);
-  const tex = new THREE.CanvasTexture(canvas);
+  const brickScale = getCurrentBrickScale();
+  const currentOffset = { x: 0.0, y: 0.12 };
 
-  // ВАЖНО: настройки для корректной работы Triplanar Mapping
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.RepeatWrapping;
-  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  tex.encoding = THREE.sRGBEncoding; // Чтобы цвета были сочными
+  // Если для фасада уже была задана активная мозаика, учитываем её или применяем одиночный цвет
+  const facadeParams = activeZoneTextures.facade && activeZoneTextures.facade.mosaicColors
+    ? { ...canvasParams, mosaicColors: activeZoneTextures.facade.mosaicColors }
+    : canvasParams;
 
-  // Присваиваем карту
-  targetMat.map = tex;
-  targetMat.needsUpdate = true;
+  applyBrickTextureToMaterial(TARGET_MATERIAL_NAME, facadeParams, brickScale, currentOffset);
+  activeZoneTextures.facade = facadeParams;
 
-  // 5. Настройка параметров отображения (Scale и Offset)
-  // brickScale: сколько метров занимает одна текстура (подбирается под размер дома)
-  // uOffset: смещение (x, y). Помогает подогнать ряд под крышу или фундамент.
-  const brickScale = 0.25;
-  const currentOffset = { x: 0.0, y: 0.12 }; // Попробуй менять Y, чтобы "двигать" ряды
-
-  // Применяем магию шейдера
-  setupWorldUV(targetMat, brickScale, currentOffset);
-
-  // 6. Финализация
-  if (currentModel) {
-    currentModel.visible = true;
+  // Если в модели есть BricksAccent (эркер и простенки трехэтажного дома):
+  if (modelMaterials.has("BricksAccent")) {
+    if (activeZoneTextures.accent) {
+      applyBrickTextureToMaterial("BricksAccent", { ...canvasParams, ...activeZoneTextures.accent }, brickScale, currentOffset);
+    } else {
+      // ИСПРАВЛЕНИЕ: Применяем тот же выбранный кирпич, чтобы вся модель окрашивалась на 100% целиком
+      applyBrickTextureToMaterial("BricksAccent", canvasParams, brickScale, currentOffset);
+    }
   }
-
-  loadEnvironmentOnce();
-  targetMat.envMapIntensity = 0.5; // Снижаем влияние внешних отражений, чтобы "родной" цвет был чище
 
   updateStatus("Текстура успешно применена (Scale: " + brickScale + ")");
   console.log(`Применена текстура: ${matchedCfg.key}`, canvasParams);
 }
 
-// Применяем текущую конфигурацию к уже загруженной модели (или откатываем)
-function applySelectionToLoadedModel() {
-  if (!modelLoaded || !currentModel) return;
+/**
+ * Применение мозаики ко всем стенам модели
+ * @param {string} zone - 'all'
+ * @param {Object} options - { mosaicColors, brickColor, mortarColor, layout, brickPixelSize, jointThickness }
+ */
+export function applyZoneMosaic(zone, options = {}) {
   const sel = getCurrentSelection();
-  if (!allModulesSelected(sel)) {
-    // Если пользователь снял что-то — откат к исходнику
-    restoreOriginalTargetMaterial();
+  const [defW, defH] = mapBrickPixelSize(sel.size || "250x120x65");
+  const defMortar = mapMortarColor(sel.color_rastvor || "black");
+  const defLayout = sel.layout || "running";
+
+  const canvasParams = {
+    brickColor: options.brickColor || mapBrickColor(sel.color_brick || "gray"),
+    mortarColor: options.mortarColor || defMortar,
+    layout: options.layout || defLayout,
+    brickPixelSize: options.brickPixelSize || [defW, defH],
+    jointThickness: options.jointThickness || 4,
+    mosaicColors: options.mosaicColors || null,
+  };
+
+  const brickScale = getCurrentBrickScale();
+  const currentOffset = { x: 0.0, y: 0.12 };
+
+  // Применяем мозаику ко всем кирпичным стенам (основные + акцентный эркер)
+  activeZoneTextures.facade = canvasParams;
+  activeZoneTextures.accent = canvasParams;
+
+  let applied = false;
+  if (modelLoaded && currentModel) {
+    const canvas = createBrickCanvas(canvasParams);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.generateMipmaps = true;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.anisotropy = Math.min(4, renderer?.capabilities?.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 4);
+    tex.encoding = THREE.sRGBEncoding;
+    tex.needsUpdate = true;
+
+    ["Bricks026", "BricksAccent"].forEach((matName) => {
+      const targetMat = modelMaterials.get(matName);
+      if (targetMat) {
+        if (targetMat.map) targetMat.map.dispose?.();
+        targetMat.map = tex;
+        if (targetMat.color) targetMat.color.set(0xffffff);
+        targetMat.roughness = 0.85;
+        targetMat.metalness = 0.0;
+        targetMat.needsUpdate = true;
+        setupWorldUV(targetMat, brickScale, currentOffset);
+        targetMat.envMapIntensity = 0.5;
+        applied = true;
+      }
+    });
+    ensureEnvironmentActive();
     if (currentModel) currentModel.visible = true;
+    requestRender(20);
+  }
+
+  updateStatus("Мозаика успешно применена ко всем стенам");
+  window.dispatchEvent(new CustomEvent("facade-mosaic-applied", { detail: { zone: "all", params: canvasParams } }));
+  return applied;
+}
+
+/**
+ * Сброс мозаики стен в обычный кирпич
+ */
+export function resetZoneMosaic(zone) {
+  const sel = getCurrentSelection();
+  const [defW, defH] = mapBrickPixelSize(sel.size || "250x120x65");
+  const defMortar = mapMortarColor(sel.color_rastvor || "black");
+  const defLayout = sel.layout || "running";
+  const defColor = mapBrickColor(sel.color_brick || "gray");
+
+  const monoParams = {
+    brickColor: defColor,
+    mortarColor: defMortar,
+    layout: defLayout,
+    brickPixelSize: [defW, defH],
+    jointThickness: 4,
+    mosaicColors: null,
+  };
+
+  const brickScale = getCurrentBrickScale();
+  const currentOffset = { x: 0.0, y: 0.12 };
+
+  activeZoneTextures.facade = monoParams;
+  activeZoneTextures.accent = monoParams;
+
+  if (modelLoaded && currentModel) {
+    const canvas = createBrickCanvas(monoParams);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.generateMipmaps = true;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.anisotropy = Math.min(4, renderer?.capabilities?.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 4);
+    tex.encoding = THREE.sRGBEncoding;
+    tex.needsUpdate = true;
+
+    ["Bricks026", "BricksAccent"].forEach((matName) => {
+      const targetMat = modelMaterials.get(matName);
+      if (targetMat) {
+        if (targetMat.map) targetMat.map.dispose?.();
+        targetMat.map = tex;
+        if (targetMat.color) targetMat.color.set(0xffffff);
+        targetMat.roughness = 0.85;
+        targetMat.metalness = 0.0;
+        targetMat.needsUpdate = true;
+        setupWorldUV(targetMat, brickScale, currentOffset);
+        targetMat.envMapIntensity = 0.5;
+      }
+    });
+    ensureEnvironmentActive();
+    if (currentModel) currentModel.visible = true;
+    requestRender(20);
+  }
+
+  updateStatus("Все стены сброшены в обычный кирпич");
+  window.dispatchEvent(new CustomEvent("facade-mosaic-applied", { detail: { zone: "all", params: monoParams } }));
+}
+
+export function getActiveZoneTextures() {
+  return { ...activeZoneTextures };
+}
+
+export function getCurrentBrickParams() {
+  const sel = getCurrentSelection();
+  const [brickW, brickH] = mapBrickPixelSize(sel.size || "250x120x65");
+  return {
+    brickColor: mapBrickColor(sel.color_brick || "gray"),
+    mortarColor: mapMortarColor(sel.color_rastvor || "black"),
+    layout: sel.layout || "running",
+    brickPixelSize: [brickW, brickH],
+    jointThickness: 4,
+    modelLoaded,
+    hasAccentMaterial: modelMaterials.has("BricksAccent"),
+    hasPlinthMaterial: modelMaterials.has("Concrete05"),
+  };
+}
+
+// Применяем текущую конфигурацию к уже загруженной модели (или откатываем)
+export function applySelectionToLoadedModel() {
+  const sel = getCurrentSelection();
+  const ready = allModulesSelected(sel);
+
+  updateModelVisibilityAndHint();
+
+  if (!ready) {
+    if (currentModel) currentModel.visible = false;
+    if (groundMesh) groundMesh.visible = false;
     return;
   }
+
+  if (!modelLoaded || !currentModel) return;
 
   const matched = findExactTextureByTags(sel);
 
   if (!matched) {
-    // Точного совпадения нет — показ исходника
+    // Точного совпадения нет
+    console.warn(`[Configurator] Точного совпадения нет для параметров:`, sel);
     restoreOriginalTargetMaterial();
-    if (currentModel) currentModel.visible = true;
+    if (currentModel) currentModel.visible = false;
+    if (groundMesh) groundMesh.visible = false;
     return;
   }
 
   // Для процедурной текстуры нет асинхронной загрузки — обновляем сразу
   applyMatchedTextureToTarget(matched);
+  if (currentModel) currentModel.visible = true;
+  if (groundMesh) groundMesh.visible = true;
+  ensureEnvironmentActive();
+  updateModelVisibilityAndHint();
 }
 
 // UI
@@ -981,24 +1566,232 @@ function initModelUI() {
   });
 }
 
-function attachSelectionListeners() {
-  modelSelect.addEventListener("change", () => {
-    updateLoadAvailability();
+// Ограничение цветов кирпича в зависимости от размера
+// На заводе ЧЗСК единственный кирпич 250×120×65 — рядовой (gray). Цветные кирпичи — только 250×120×88.
+export function updateColorAvailabilityBySize() {
+  const currentSize = document.querySelector('input[name="size"]:checked')?.value;
+  const isSingle = currentSize === "250x120x65";
+  const colorRadios = radiosColorBrick();
+
+  const mosaicBtn = document.getElementById("mosaicBtn");
+  if (mosaicBtn) {
+    if (isSingle) {
+      mosaicBtn.disabled = true;
+      mosaicBtn.classList.add("btn-disabled");
+      mosaicBtn.setAttribute("title", "Мозаика недоступна для размера 250×120×65 (доступен только рядовой цвет)");
+      // Если пользователь переключился на 250x120x65 в то время, когда была наложена мозаика — сбрось мозаику в обычный цвет
+      if (activeZoneTextures.facade?.mosaicColors || activeZoneTextures.accent?.mosaicColors) {
+        resetZoneMosaic("all");
+      }
+    } else {
+      mosaicBtn.disabled = false;
+      mosaicBtn.classList.remove("btn-disabled");
+      mosaicBtn.setAttribute("title", "Конструктор мозаики");
+    }
+  }
+
+  colorRadios.forEach((radio) => {
+    const label = radio.closest("label");
+    if (isSingle) {
+      if (radio.value !== "gray") {
+        radio.disabled = true;
+        if (label) {
+          label.classList.add("color-tile-disabled");
+          label.setAttribute("title", "Доступен только в размере 250×120×88 на заводе ЧЗСК");
+        }
+      } else {
+        radio.disabled = false;
+        if (label) {
+          label.classList.remove("color-tile-disabled");
+          label.setAttribute("title", "Серо-голубой (рядовой 200/50)");
+        }
+      }
+    } else {
+      radio.disabled = false;
+      if (label) {
+        label.classList.remove("color-tile-disabled");
+        const originalTitles = {
+          gray: "Серо-голубой",
+          gray2: "Тёмно-серый",
+          pink: "Розово-персиковый",
+          peach: "Персиковый",
+          beige: "Бежево-кремовый",
+          cream: "Кремово-белый",
+        };
+        label.setAttribute("title", originalTitles[radio.value] || "");
+      }
+    }
   });
 
-  const attach = (nodes) =>
-    nodes.forEach((n) => {
-      n.addEventListener("change", () => {
-        updateLoadAvailability();
-        // Вот эта строка отвечает за авто-обновление 3D на лету:
-        if (modelLoaded) applySelectionToLoadedModel();
+  // Если выбран 250x120x65 и сейчас был выбран недоступный цвет — переключаем на gray
+  if (isSingle) {
+    const checkedColor = document.querySelector('input[name="color_brick"]:checked');
+    if (!checkedColor || checkedColor.value !== "gray") {
+      const grayRadio = document.querySelector('input[name="color_brick"][value="gray"]');
+      if (grayRadio) {
+        grayRadio.checked = true;
+        grayRadio.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
+  }
+}
+
+// ================= СОХРАНЕНИЕ И ВОССТАНОВЛЕНИЕ СОСТОЯНИЯ =================
+const STATE_STORAGE_KEY = "threejsbrick_active_state_v1";
+
+function saveActiveState() {
+  const sel = getCurrentSelection();
+  if (!sel.modelKey) return;
+  const state = {
+    modelKey: sel.modelKey,
+    size: sel.size,
+    layout: sel.layout,
+    color_brick: sel.color_brick,
+    color_rastvor: sel.color_rastvor,
+  };
+  try {
+    localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {}
+}
+
+function restoreActiveState() {
+  try {
+    const raw = localStorage.getItem(STATE_STORAGE_KEY);
+    if (!raw) return null;
+    const state = JSON.parse(raw);
+    if (!state || !state.modelKey) return null;
+
+    if (modelSelect) {
+      modelSelect.value = state.modelKey;
+    }
+
+    const setRadio = (name, val) => {
+      if (!val) return;
+      const r = document.querySelector(`input[name="${name}"][value="${val}"]`);
+      if (r) r.checked = true;
+    };
+
+    setRadio("size", state.size);
+    updateColorAvailabilityBySize();
+    setRadio("layout", state.layout);
+    setRadio("color_brick", state.color_brick);
+    setRadio("color_rastvor", state.color_rastvor);
+
+    updateLoadAvailability();
+    return state;
+  } catch (e) {
+    return null;
+  }
+}
+
+function attachSelectionListeners() {
+  modelSelect.addEventListener("change", async () => {
+    updateLoadAvailability();
+    updateModelVisibilityAndHint();
+    saveActiveState();
+    const sel = getCurrentSelection();
+    if (sel.modelKey) {
+      if (modelLoaded && currentModel && currentModelKey === sel.modelKey) {
+        applySelectionToLoadedModel();
+        return;
+      }
+      try {
+        await loadModelByKey(sel.modelKey);
+        applySelectionToLoadedModel();
+        ensureEnvironmentActive();
+        requestRender(20);
+      } catch (e) {
+        console.warn("Ошибка переключения модели:", e);
+      }
+    } else {
+      unloadCurrentModel();
+      updateModelVisibilityAndHint();
+      requestRender(10);
+    }
+  });
+
+  const is2DModeActive = () => {
+    const card2D = document.getElementById("card2D");
+    return Boolean(card2D && window.getComputedStyle(card2D).display !== "none");
+  };
+
+  const handleRadioChange = () => {
+    // Если объект не выбран, автоматически выбираем первый доступный объект
+    if (!modelSelect.value && modelSelect.options.length > 1) {
+      modelSelect.value = modelSelect.options[1].value;
+    }
+
+    // Если раствор не выбран, но выбран цвет кирпича — по умолчанию черный раствор
+    const checkedRastvor = document.querySelector('input[name="color_rastvor"]:checked');
+    if (!checkedRastvor) {
+      const defaultRastvor = document.querySelector('input[name="color_rastvor"][value="black"]');
+      if (defaultRastvor) defaultRastvor.checked = true;
+    }
+
+    updateLoadAvailability();
+    if (!is2DModeActive()) {
+      const sel = getCurrentSelection();
+      if (sel.modelKey && allModulesSelected(sel)) {
+        if (!modelLoaded) {
+          loadModelByKey(sel.modelKey)
+            .then(() => {
+              applySelectionToLoadedModel();
+              ensureEnvironmentActive();
+              requestRender(20);
+            })
+            .catch((err) => console.warn("Ошибка загрузки модели:", err));
+        } else {
+          applySelectionToLoadedModel();
+          ensureEnvironmentActive();
+          requestRender(20);
+        }
+      }
+    }
+    updateModelVisibilityAndHint();
+    saveActiveState();
+    requestRender(20);
+  };
+
+  // Отслеживаем смену размера для блокировки цветов ЧЗСК
+  radiosSize().forEach((r) => {
+    r.addEventListener("change", () => {
+      updateColorAvailabilityBySize();
+      handleRadioChange();
+    });
+  });
+
+  radiosLayout().forEach((r) => {
+    r.addEventListener("change", handleRadioChange);
+  });
+
+  radiosColorBrick().forEach((r) => {
+    r.addEventListener("change", () => {
+      // Сбрасываем мозаику при выборе конкретного цвета кирпича
+      activeZoneTextures.facade = null;
+      activeZoneTextures.accent = null;
+      handleRadioChange();
+    });
+  });
+
+  radiosColorRastvor().forEach((r) => {
+    r.addEventListener("change", handleRadioChange);
+  });
+
+  // Интерактивный ползунок масштаба кладки
+  const brickScaleSlider = document.getElementById("brick-scale-slider");
+  const brickScaleValue = document.getElementById("brick-scale-value");
+  if (brickScaleSlider) {
+    brickScaleSlider.addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value);
+      if (brickScaleValue) brickScaleValue.textContent = val.toFixed(1);
+      ["Bricks026", "BricksAccent"].forEach((matName) => {
+        const mat = modelMaterials.get(matName);
+        if (mat && mat.userData && mat.userData.uBrickScale) {
+          mat.userData.uBrickScale.value = val;
+        }
       });
     });
-
-  attach(radiosSize());
-  attach(radiosLayout());
-  attach(radiosColorBrick());
-  attach(radiosColorRastvor());
+  }
 }
 
 // Init
@@ -1014,21 +1807,66 @@ async function initUI() {
 
   initModelUI();
   attachSelectionListeners();
+  updateColorAvailabilityBySize();
   updateLoadAvailability();
 
-  loadBtn.addEventListener("click", async () => {
-    const sel = getCurrentSelection();
-    if (!allModulesSelected(sel)) return;
+  // Восстановление ранее выбранной конфигурации и модели
+  const restored = restoreActiveState();
 
-    try {
-      await loadModelByKey(sel.modelKey);
-
-      // Сразу при загрузке модели — пытаемся применить точное совпадение
-      applySelectionToLoadedModel();
-    } catch (e) {
-      // ошибки уже обработаны внутри
+  // Если состояние не было сохранено (первый визит) — выставляем дефолт
+  if (!restored || !restored.modelKey) {
+    if (modelSelect && modelSelect.options.length > 1) {
+      modelSelect.value = modelSelect.options[1].value;
     }
-  });
+    const setDefaultRadio = (name, val) => {
+      const r = document.querySelector(`input[name="${name}"][value="${val}"]`);
+      if (r) r.checked = true;
+    };
+    setDefaultRadio("size", "250x120x88");
+    setDefaultRadio("layout", "running");
+    setDefaultRadio("color_brick", "gray");
+    setDefaultRadio("color_rastvor", "black");
+    updateColorAvailabilityBySize();
+    updateLoadAvailability();
+    saveActiveState();
+  }
+
+  if (loadBtn) {
+    loadBtn.addEventListener("click", async () => {
+      const sel = getCurrentSelection();
+      if (!allModulesSelected(sel)) return;
+
+      // Если модель уже загружена и ключ совпадает — не перезагружаем тяжелый GLTF!
+      // Мгновенно применяем выбранный кирпич/текстуру
+      if (modelLoaded && currentModel && currentModelKey === sel.modelKey) {
+        applySelectionToLoadedModel();
+        saveActiveState();
+        return;
+      }
+
+      try {
+        await loadModelByKey(sel.modelKey);
+        applySelectionToLoadedModel();
+        saveActiveState();
+      } catch (e) {
+        // ошибки уже обработаны внутри
+      }
+    });
+  }
+
+  // Загружаем активную модель сразу при открытии страницы
+  const activeSel = getCurrentSelection();
+  if (activeSel.modelKey && allModulesSelected(activeSel)) {
+    loadModelByKey(activeSel.modelKey)
+      .then(() => {
+        applySelectionToLoadedModel();
+      })
+      .catch((err) => {
+        console.warn("Автозагрузка модели не удалась:", err);
+      });
+  } else {
+    updateModelVisibilityAndHint();
+  }
 
   resetBtn.addEventListener("click", () => {
     // Сброс выпадающих меню и радио-кнопок
@@ -1043,15 +1881,19 @@ async function initUI() {
     // Удаляем модель
     unloadCurrentModel();
 
-    // Сбрасываем HDR-фон
-    scene.background = null;
-    scene.environment = null;
+    // Сохраняем приятный небесный фон сцены (НЕ черный void!)
+    scene.background = new THREE.Color(0xdce7ef);
+    if (groundMesh) groundMesh.visible = false;
 
-    // Разрешаем загрузить окружение заново
-    envLoaded = false;
+    try {
+      localStorage.removeItem(STATE_STORAGE_KEY);
+    } catch (e) {}
 
+    updateColorAvailabilityBySize();
     updateLoadAvailability();
+    updateModelVisibilityAndHint();
     updateStatus("Состояние сцены сброшено");
+    requestRender(10);
   });
 }
 
@@ -1061,29 +1903,97 @@ if (document.readyState === "loading") {
   initUI();
 }
 
-// Подстраиваем камеру/рендер под блок с 3D
-const ro = new ResizeObserver(() => {
-  sizeFromContainer();
-});
+// Подстраиваем камеру/рендер под блок с 3D с троттлингом через requestAnimationFrame
+let resizeRafId = null;
+const handleResizeDebounced = () => {
+  if (resizeRafId) cancelAnimationFrame(resizeRafId);
+  resizeRafId = requestAnimationFrame(() => {
+    resizeRafId = null;
+    sizeFromContainer();
+    requestRender(10);
+  });
+};
+
+const ro = new ResizeObserver(handleResizeDebounced);
 ro.observe(container);
 
+window.addEventListener("resize", handleResizeDebounced);
+
+window.addEventListener("view-mode-changed", (e) => {
+  if (e.detail?.mode === "3D") {
+    if (modelLoaded && currentModel) {
+      applySelectionToLoadedModel();
+    }
+    requestAnimationFrame(() => {
+      sizeFromContainer(true);
+      requestRender(20);
+    });
+  }
+});
+
+// Viewport Culling: отслеживаем видимость контейнера во viewport
+if (typeof IntersectionObserver !== "undefined" && container) {
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        isViewerInViewport = entry.isIntersecting;
+        if (isViewerInViewport) {
+          requestRender(20);
+        }
+      });
+    },
+    { threshold: 0.01 }
+  );
+  io.observe(container);
+}
+
 function animate() {
-  requestAnimationFrame(animate);
-  const rect = container.getBoundingClientRect();
-  const needW = Math.max(1, Math.floor(rect.width));
-  const needH = Math.max(1, Math.floor(rect.height));
-  const canvas = renderer.domElement;
-  const px = renderer.getPixelRatio();
-  if (
-    canvas.width !== Math.floor(needW * px) ||
-    canvas.height !== Math.floor(needH * px)
-  ) {
-    renderer.setSize(needW, needH, false);
-    camera.aspect = needW / needH;
-    camera.updateProjectionMatrix();
+  animationFrameId = requestAnimationFrame(animate);
+
+  // Если 3D-контейнер не виден на экране — полностью пропускаем рендеринг!
+  if (!isViewerInViewport) {
+    return;
   }
 
-  controls.update();
-  renderer.render(scene, camera);
+  let needRender = false;
+
+  if (controls) {
+    // controls.update() возвращает true, если камера переместилась (включая damping)
+    const moved = controls.update();
+    if (moved) {
+      needRender = true;
+      pendingRenderFrames = Math.max(pendingRenderFrames, 5);
+    }
+  }
+
+  if (pendingRenderFrames > 0) {
+    pendingRenderFrames--;
+    needRender = true;
+  }
+
+  if (needRender && renderer && scene && camera) {
+    renderer.render(scene, camera);
+  }
 }
 animate();
+
+// Глобальный доступ для надежности и тестов
+window.THREE = THREE;
+window.recoverRenderer = recoverRenderer;
+window.__threeApp = {
+  get scene() { return scene; },
+  get camera() { return camera; },
+  get controls() { return controls; },
+  get renderer() { return renderer; },
+  get currentModel() { return currentModel; },
+  get modelLoaded() { return modelLoaded; },
+  get currentModelKey() { return currentModelKey; },
+  get cachedEnvTexture() { return cachedEnvTexture; },
+  get isViewerInViewport() { return isViewerInViewport; },
+  get pendingRenderFrames() { return pendingRenderFrames; },
+  THREE,
+  fitCameraToObject,
+  recoverRenderer,
+  ensureEnvironmentActive,
+  requestRender,
+};

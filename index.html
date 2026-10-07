@@ -2,24 +2,73 @@
 <html lang="ru">
   <head>
     <meta charset="utf-8" />
-    <title>Визуализатор кирпичной кладки</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <title>Визуальный конструктор кирпичной кладки</title>
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/mobile.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./js/vendor/three/three.module.js",
+          "three/": "./js/vendor/three/"
+        }
+      }
+    </script>
+    <script>
+      // Проверка запуска через протокол file:// (прямой клик по index.html)
+      (function() {
+        if (window.location.protocol === 'file:') {
+          window.addEventListener('DOMContentLoaded', function() {
+            var warnDiv = document.createElement('div');
+            warnDiv.id = 'offline-file-protocol-warning';
+            warnDiv.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.88);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;">' +
+              '<div style="background:#ffffff;color:#1e293b;max-width:640px;width:100%;border-radius:16px;padding:32px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);text-align:left;line-height:1.6;">' +
+                '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">' +
+                  '<span style="font-size:36px;line-height:1;">⚠️</span>' +
+                  '<h2 style="margin:0;font-size:22px;color:#b91c1c;font-weight:700;">Требуется запуск через локальный сервер</h2>' +
+                '</div>' +
+                '<p style="margin:0 0 16px;font-size:15px;color:#334155;">' +
+                  'Вы открыли проект напрямую через файл (<code>file:///</code>). Браузеры блокируют загрузку 3D-моделей (.gltf / .bin) и JavaScript-модулей при прямом открытии файлов из-за встроенной политики безопасности CORS.' +
+                '</p>' +
+                '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:20px;">' +
+                  '<p style="margin:0 0 10px;font-weight:600;color:#0f172a;font-size:15px;">Как правильно запустить проект без интернета:</p>' +
+                  '<ol style="margin:0;padding-left:20px;font-size:14px;color:#334155;">' +
+                    '<li style="margin-bottom:8px;"><strong>Самый простой способ:</strong> запустите файл <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;font-weight:600;">start_offline.bat</code> в папке проекта. Он автоматически запустит сервер и откроет браузер.</li>' +
+                    '<li style="margin-bottom:8px;"><strong>Через VS Code:</strong> нажмите «Go Live» в строке состояния (расширение Live Server).</li>' +
+                    '<li><strong>Через консоль:</strong> запустите <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;">node server.js</code> или <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;">python -m http.server 5500</code>.</li>' +
+                  '</ol>' +
+                '</div>' +
+                '<div style="display:flex;justify-content:flex-end;">' +
+                  '<button onclick="document.getElementById(\'offline-file-protocol-warning\').remove()" style="background:#e2e8f0;border:none;padding:10px 18px;border-radius:8px;font-size:14px;cursor:pointer;color:#475569;font-weight:600;">Закрыть предупреждение</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+            document.body.prepend(warnDiv);
+          });
+        }
+      })();
+    </script>
   </head>
   <body>
-    <header>
-      <h1>Череповецкий завод силикатного кирпича</h1>
+    <header class="site-header">
+      <div class="site-header__brand">
+        <a href="https://silicatbrick.ru/" target="_blank" rel="noopener noreferrer" class="site-header__logo-link" title="Череповецкий завод силикатного кирпича">
+          <img class="ty-pict ty-logo-container__image cm-image site-header__logo" width="511" height="90" alt="Череповецкий завод силикатного кирпича" title="Череповецкий завод силикатного кирпича" id="det_img_2039242231" src="images/logo.png" />
+        </a>
+        <h1 class="site-header__title">Визуальный конструктор кирпичной кладки</h1>
+      </div>
 
       <!-- Панель выбора параметров -->
       <nav class="panel" id="config-panel" aria-label="Конфигуратор">
-        <!-- ОБЪЕКТ (отдельным блоком сверху) -->
-          <fieldset class="object-fieldset">
-            <legend>Объект</legend>
-            <div class="row">
-              <select id="model-select">
-                <option value="">— Выберите объект —</option>
-              </select>
-            </div>
-          </fieldset>
+        <!-- ОБЪЕКТ -->
+        <fieldset class="object-fieldset">
+          <legend>Объект</legend>
+          <div class="row">
+            <select id="model-select">
+              <option value="">— Выберите объект —</option>
+            </select>
+          </div>
+        </fieldset>
 
         <!-- Остальные меню в одну строку -->
         <div class="settings-row">
@@ -27,64 +76,531 @@
           <fieldset>
             <legend>Размер кирпича</legend>
             <div class="options" id="size-options">
-              <label><input type="radio" name="size" value="250x120x65" /> 250×120×65</label>
-              <label><input type="radio" name="size" value="250x120x88" /> 250×120×88</label>
+              <label title="250×120×65"><input type="radio" name="size" value="250x120x65" /> 250×120×65</label>
+              <label title="250×120×88"><input type="radio" name="size" value="250x120x88" checked /> 250×120×88</label>
             </div>
           </fieldset>
 
           <!-- Вид кладки -->
-            <fieldset>
-              <legend>Вид кладки</legend>
-              <div class="options" id="layout-options">
-                <label title="Ложковая"><input type="radio" name="layout" value="running" /> Кладка 1</label>
-                <label title="Многорядная (3+1)"><input type="radio" name="layout" value="multirow" /> Кладка 2</label>
-                <label title="Шестирядная (5+1)"><input type="radio" name="layout" value="multirow_5_1" /> Кладка 3</label> </div>
-            </fieldset>          <!-- Цвет кирпича -->
-            <fieldset>
-              <legend>Цвет кирпича</legend>
-              <div class="options" id="color-brick-options">
-                <label title="Красный"><input type="radio" name="color_brick" value="red" /></label>
-                <label title="Жёлтый"><input type="radio" name="color_brick" value="yellow" /></label>
-                <label title="Белый"><input type="radio" name="color_brick" value="white" /></label>
-                <label title="Чёрный"><input type="radio" name="color_brick" value="black" /></label>
-                <label title="Оранжевый"><input type="radio" name="color_brick" value="orange" /></label>
-                <label title="Серый"><input type="radio" name="color_brick" value="gray" /></label>
-                <label title="Синий"><input type="radio" name="color_brick" value="blue" /></label>
-                <label title="Зеленый"><input type="radio" name="color_brick" value="green" /></label>
-              </div>
-            </fieldset>
+          <fieldset>
+            <legend>Вид кладки</legend>
+            <div class="options" id="layout-options">
+              <label title="Ложковая"><input type="radio" name="layout" value="running" checked /> Кладка 1</label>
+              <label title="Многорядная (3+1)"><input type="radio" name="layout" value="multirow" /> Кладка 2</label>
+              <label title="Шестирядная (5+1)"><input type="radio" name="layout" value="multirow_5_1" /> Кладка 3</label>
+            </div>
+          </fieldset>
+
+          <!-- Цвет кирпича -->
+          <fieldset>
+            <legend>Цвет кирпича</legend>
+            <div class="options" id="color-brick-options">
+              <label title="Серо-голубой"><input type="radio" name="color_brick" value="gray" checked /></label>
+              <label title="Тёмно-серый"><input type="radio" name="color_brick" value="gray2" /></label>
+              <label title="Розово-персиковый"><input type="radio" name="color_brick" value="pink" /></label>
+              <label title="Персиковый"><input type="radio" name="color_brick" value="peach" /></label>
+              <label title="Бежево-кремовый"><input type="radio" name="color_brick" value="beige" /></label>
+              <label title="Кремово-белый"><input type="radio" name="color_brick" value="cream" /></label>
+            </div>
+          </fieldset>
+
           <!-- Цвет раствора -->
           <fieldset>
             <legend>Цвет раствора</legend>
             <div class="options" id="color-rastvor-options">
-              <label><input type="radio" name="color_rastvor" value="black" /></label>
-              <label><input type="radio" name="color_rastvor" value="white" /></label>
+              <label title="Тёмный"><input type="radio" name="color_rastvor" value="black" checked /></label>
+              <label title="Светлый"><input type="radio" name="color_rastvor" value="white" /></label>
+            </div>
+          </fieldset>
+
+          <!-- Размер кладки -->
+          <fieldset>
+            <legend>Размер кладки</legend>
+            <div class="slider-wrap">
+              <input type="range" id="brick-scale-slider" min="0.1" max="10" step="0.1" value="0.5" />
+              <span id="brick-scale-value" class="slider-value">0.5</span>
             </div>
           </fieldset>
         </div>
       </nav>
 
-      <!-- Кнопки ниже всех меню -->
+      <!-- Кнопки -->
       <div class="actions-row">
-        <button id="loadBtn" class="btn" disabled>Визуализация</button>
-        <button id="view2DBtn" class="btn" type="button" disabled>2D Просмотр</button> <button id="resetBtn" class="btn" type="button">Сброс</button>
+        <button id="mosaicBtn" class="btn btn-mosaic" type="button" title="Конструктор кладки">
+          <svg class="mosaic-btn-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: -3px; margin-right: 6px;">
+            <rect x="1" y="2" width="8" height="4.5" rx="1" fill="#ffffff" fill-opacity="0.95" />
+            <rect x="11" y="2" width="8" height="4.5" rx="1" fill="#f0b8a0" />
+            <rect x="1" y="8" width="4.5" height="4.5" rx="1" fill="#8f9ba5" />
+            <rect x="7.5" y="8" width="11.5" height="4.5" rx="1" fill="#ffffff" fill-opacity="0.8" />
+            <rect x="1" y="14" width="10" height="4" rx="1" fill="#e8a89a" />
+            <rect x="13" y="14" width="6" height="4" rx="1" fill="#a8b0b8" />
+          </svg>
+          МОЗАИКА
+        </button>
+        <button id="view2DBtn" class="btn" type="button" disabled>2D Просмотр</button>
+        <button id="resetBtn" class="btn" type="button">Сброс</button>
         <span id="status" aria-live="polite" class="status-text"></span>
       </div>
     </header>
 
     <main>
+      <!-- Карточка-просмотрщик 3D -->
       <div class="viewer-card" id="card3D">
         <div class="viewer-header">Визуализация дома (3D)</div>
-        <div id="container3D" class="viewer-canvas" role="region" aria-label="3D-сцена"></div>
+        <div id="container3D" class="viewer-canvas" role="region" aria-label="3D-сцена">
+          <div id="hintOverlay3D" class="viewer-hint-overlay" style="display: none;">
+            <div class="viewer-hint-icon">🧱</div>
+            <div class="viewer-hint-text">Выберите размер кирпича, кладку и цвет для отображения дома</div>
+          </div>
+        </div>
       </div>
 
+      <!-- Карточка-просмотрщик 2D -->
       <div class="viewer-card" id="card2D" style="display: none; margin-top: 20px;">
         <div class="viewer-header">Плоская текстура кладки (2D)</div>
         <div id="container2D" style="width: 100%; height: 600px; background: #fafafa; display: flex; align-items: center; justify-content: center; overflow: hidden;"></div>
       </div>
     </main>
 
+    <!-- ================= НЕДАВНО ПРОСМОТРЕННЫЕ ================= -->
+    <section class="panel viewed-section" id="viewedSection" aria-label="Недавно просмотренные товары">
+      <div class="viewed-header">
+        <div class="viewed-title-group">
+          <h2 class="viewed-title">Недавно просмотренные</h2>
+          <span class="viewed-count-badge" id="viewedCount">0</span>
+        </div>
+        <div class="viewed-header__actions">
+          <div class="viewed-arrows">
+            <button id="viewedPrevBtn" class="viewed-nav-btn" type="button" aria-label="Предыдущие товары" title="Предыдущие товары">‹</button>
+            <button id="viewedNextBtn" class="viewed-nav-btn" type="button" aria-label="Следующие товары" title="Следующие товары">›</button>
+          </div>
+          <button id="clearViewedBtn" class="viewed-clear-btn" type="button" title="Очистить историю просмотров">
+            Очистить историю
+          </button>
+        </div>
+      </div>
+      <div class="viewed-carousel-wrap">
+        <div id="viewedItemsList" class="viewed-cards-list"></div>
+      </div>
+    </section>
+
+    <!-- ================= КОРЗИНА ================= -->
+    <button id="cartBtn" class="cart-fab" aria-label="Корзина">
+      🛒 <span id="cartCount" class="cart-fab__count">0</span>
+    </button>
+
+    <section class="panel cart-panel">
+      <fieldset>
+        <legend>Добавить в корзину</legend>
+        <div class="cart-panel__row">
+          <label>
+            Цвет кирпича
+            <select id="cartColor">
+              <option value="gray">Серо-голубой</option>
+              <option value="gray2">Тёмно-серый</option>
+              <option value="pink">Розово-персиковый</option>
+              <option value="peach">Персиковый</option>
+              <option value="beige">Бежево-кремовый</option>
+              <option value="cream">Кремово-белый</option>
+            </select>
+          </label>
+          <label>
+            Количество
+            <input id="cartQty" type="number" min="1" value="1" />
+          </label>
+          <div class="cart-panel__total">
+            Итого: <span id="cartPanelTotal">22,70 ₽</span>
+          </div>
+          <button id="addToCartBtn" class="btn" type="button">В корзину</button>
+        </div>
+      </fieldset>
+    </section>
+
+    <!-- Модалка: Корзина -->
+    <div id="cartModal" class="modal" hidden>
+      <div class="modal__overlay" data-close-cart></div>
+      <div class="modal__content">
+        <button class="modal__close" data-close-cart>×</button>
+        <h2>Корзина</h2>
+        <div id="cartItems"></div>
+        <div class="cart-total">
+          Итого: <strong id="cartTotal">0 ₽</strong>
+        </div>
+        <div class="cart-actions-row">
+          <button id="checkoutBtn" class="btn" type="button" disabled>Оформить заявку (Email)</button>
+          <a href="https://silicatbrick.ru/cart/" target="_blank" rel="noopener noreferrer" class="btn btn--outline cart-btn--online-shop" title="Перейти в официальный интернет-магазин завода silicatbrick.ru">
+            Корзина на silicatbrick.ru ↗
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модалка: Оформление заказа -->
+    <div id="checkoutModal" class="modal" hidden>
+      <div class="modal__overlay" data-close-checkout></div>
+      <div class="modal__content">
+        <button class="modal__close" data-close-checkout>×</button>
+        <h2>Оформление заказа</h2>
+        <p class="modal__hint">
+          Заполните контакты — мы свяжемся с вами для подтверждения.
+        </p>
+
+        <form id="checkoutForm" class="checkout-form" novalidate>
+          <label>
+            Имя *
+            <input name="name" type="text" required minlength="2"
+                   placeholder="Иван Иванов" />
+          </label>
+
+          <label>
+            Email *
+            <input name="email" type="email" required
+                   placeholder="ivan@example.com" />
+          </label>
+
+          <label>
+            Телефон *
+            <input name="phone" type="tel" required
+                   pattern="[\+0-9\s\-\(\)]{10,18}"
+                   placeholder="+7 (999) 123-45-67" />
+          </label>
+
+          <label>
+            Город доставки
+            <input name="city" type="text" placeholder="Череповец" />
+          </label>
+
+          <label>
+            Адрес доставки
+            <input name="address" type="text"
+                   placeholder="ул. Ленина, д. 1, кв. 1" />
+          </label>
+
+          <label>
+            Комментарий к заказу
+            <textarea name="comment" rows="3"
+                      placeholder="Например: нужен звонок за час до доставки"></textarea>
+          </label>
+
+          <label class="checkbox-row">
+            <input type="checkbox" name="consent" required />
+            <span>Согласен на <a href="https://silicatbrick.ru/politika-konfidencialnosti/" target="_blank" rel="noopener noreferrer" class="consent-link">обработку персональных данных</a> *</span>
+          </label>
+
+          <div class="form-status" data-status></div>
+
+          <button type="submit" class="btn">Отправить заявку</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Модалка: Спасибо -->
+    <div id="thanksModal" class="modal" hidden>
+      <div class="modal__overlay" data-close-thanks></div>
+      <div class="modal__content">
+        <button class="modal__close" data-close-thanks>×</button>
+        <h2>Спасибо за заявку!</h2>
+        <p>Мы получили ваш заказ и свяжемся с вами в ближайшее время.</p>
+        <p class="modal__hint">
+          Копия заявки отправлена на указанный вами email.
+        </p>
+      </div>
+    </div>
+
+    <!-- ================= ОБРАТНАЯ СВЯЗЬ И ЗВОНОК ================= -->
+    <div class="feedback-buttons">
+      <button id="feedbackBtn" class="btn btn--outline" type="button">
+        ✉ Обратная связь
+      </button>
+      <button id="callbackBtn" class="btn btn--outline" type="button">
+        📞 Заказать звонок
+      </button>
+    </div>
+
+    <!-- Модалка: Обратная связь -->
+    <div id="feedbackModal" class="modal" hidden>
+      <div class="modal__overlay" data-close-feedback></div>
+      <div class="modal__content">
+        <button class="modal__close" data-close-feedback>×</button>
+        <h2>Обратная связь</h2>
+        <p class="modal__hint">Задайте вопрос или оставьте отзыв — мы ответим на указанный email.</p>
+
+        <form id="feedbackForm" class="feedback-form" novalidate>
+          <label>
+            Имя *
+            <input name="name" type="text" required minlength="2" placeholder="Иван Иванов" />
+          </label>
+
+          <label>
+            Email *
+            <input name="email" type="email" required placeholder="ivan@example.com" />
+          </label>
+
+          <label>
+            Тема сообщения *
+            <select name="subject" required>
+              <option value="">— Выберите тему —</option>
+              <option value="product">Вопрос о продукции</option>
+              <option value="delivery">Доставка и оплата</option>
+              <option value="partnership">Сотрудничество</option>
+              <option value="complaint">Жалоба или претензия</option>
+              <option value="other">Другое</option>
+            </select>
+          </label>
+
+          <label>
+            Сообщение *
+            <textarea name="message" rows="5" required minlength="10"
+                      placeholder="Опишите ваш вопрос подробнее..."></textarea>
+          </label>
+
+          <label class="checkbox-row">
+            <input type="checkbox" name="consent" required />
+            <span>Согласен на <a href="https://silicatbrick.ru/politika-konfidencialnosti/" target="_blank" rel="noopener noreferrer" class="consent-link">обработку персональных данных</a> *</span>
+          </label>
+
+          <div class="form-status" data-status></div>
+
+          <button type="submit" class="btn">Отправить</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Модалка: Заказ звонка -->
+    <div id="callbackModal" class="modal" hidden>
+      <div class="modal__overlay" data-close-callback></div>
+      <div class="modal__content">
+        <button class="modal__close" data-close-callback>×</button>
+        <h2>Заказать звонок</h2>
+        <p class="modal__hint">Оставьте контакты — менеджер перезвонит в удобное время.</p>
+
+        <form id="callbackForm" class="feedback-form" novalidate>
+          <label>
+            Имя *
+            <input name="name" type="text" required minlength="2" placeholder="Иван" />
+          </label>
+
+          <label>
+            Телефон *
+            <input name="phone" type="tel" required
+                   pattern="[\+0-9\s\-\(\)]{10,18}"
+                   placeholder="+7 (999) 123-45-67" />
+          </label>
+
+          <label>
+            Удобное время звонка *
+            <select name="callTime" required>
+              <option value="">— Выберите интервал —</option>
+              <option value="09-12">Утро (09:00 – 12:00)</option>
+              <option value="12-15">День (12:00 – 15:00)</option>
+              <option value="15-18">После обеда (15:00 – 18:00)</option>
+              <option value="18-20">Вечер (18:00 – 20:00)</option>
+              <option value="anytime">Любое время</option>
+            </select>
+          </label>
+
+          <label>
+            Комментарий
+            <textarea name="comment" rows="3"
+                      placeholder="Например: интересует цена на полнотелый кирпич"></textarea>
+          </label>
+
+          <label class="checkbox-row">
+            <input type="checkbox" name="consent" required />
+            <span>Согласен на <a href="https://silicatbrick.ru/politika-konfidencialnosti/" target="_blank" rel="noopener noreferrer" class="consent-link">обработку персональных данных</a> *</span>
+          </label>
+
+          <div class="form-status" data-status></div>
+
+          <button type="submit" class="btn">Жду звонка</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ================= ПОДВАЛ И АДМИН-ПАНЕЛЬ ================= -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__copy">
+          © Череповецкий завод силикатного кирпича
+        </div>
+        <div class="site-footer__actions">
+          <button id="adminPanelBtn" class="btn btn-admin" type="button">
+            Панель администратора
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Модалка: Авторизация администратора -->
+    <div id="adminAuthModal" class="modal admin-auth-modal" hidden>
+      <div class="modal__overlay" data-close-admin-auth></div>
+      <div class="modal__content modal__content--auth">
+        <button class="modal__close" data-close-admin-auth title="Закрыть">×</button>
+        <div class="admin-auth-header">
+          <div class="admin-auth-icon">⚙</div>
+          <h2>Вход в панель администратора</h2>
+          <p class="modal__hint">Аналитика просмотров и предпочтений покупателей ЧЗСК</p>
+        </div>
+        <form id="adminAuthForm" class="admin-auth-form" novalidate>
+          <label for="adminPinInput">Пароль доступа:</label>
+          <input type="password" id="adminPinInput" class="admin-pin-input" placeholder="Введите пароль (по умолчанию: chzsk2026)" autocomplete="current-password" required />
+          <div id="adminAuthError" class="admin-auth-error" hidden>Неверный пароль. Попробуйте еще раз.</div>
+          <div class="admin-auth-actions">
+            <button type="submit" class="btn btn-primary admin-auth-submit">Войти</button>
+            <button type="button" class="btn btn--outline" data-close-admin-auth>Отмена</button>
+          </div>
+          <div class="admin-auth-footer-hint">
+            💡 <strong>Код доступа для тестирования:</strong> <code>chzsk2026</code><br />
+            В релизе на сайте <a href="https://silicatbrick.ru" target="_blank" rel="noopener noreferrer">silicatbrick.ru</a> панель автоматически открывается для авторизованных администраторов интернет-магазина.
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Модалка: Панель администратора -->
+    <div id="adminModal" class="modal admin-modal" hidden>
+      <div class="modal__overlay" data-close-admin></div>
+      <div class="modal__content modal__content--wide">
+        <button class="modal__close" data-close-admin title="Закрыть окно">×</button>
+
+        <div class="admin-header">
+          <div class="admin-header__title-wrap">
+            <h2>Панель администратора</h2>
+            <p class="modal__hint">Аналитика интереса клиентов и статистика просмотров кирпичной кладки</p>
+          </div>
+          <div class="admin-toolbar">
+            <button id="adminExportCsvBtn" class="btn btn--outline admin-btn--export" type="button" title="Скачать аналитику для Excel">
+              📥 Экспорт в CSV
+            </button>
+            <button id="adminResetBtn" class="btn btn--outline admin-btn--reset" type="button" title="Очистить всю аналитику">
+              🗑 Сбросить статистику
+            </button>
+            <button id="adminLogoutBtn" class="btn btn--outline admin-btn--logout" type="button" title="Выйти из режима администратора">
+              🔒 Выйти
+            </button>
+          </div>
+        </div>
+
+        <!-- Сводка (KPI карточки) -->
+        <div class="admin-kpi-grid">
+          <div class="admin-kpi-card">
+            <span class="admin-kpi-card__label">Всего просмотров</span>
+            <span class="admin-kpi-card__value" id="adminKpiTotal">0</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="admin-kpi-card__label">Уникальных конфигураций</span>
+            <span class="admin-kpi-card__value" id="adminKpiUnique">0</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="admin-kpi-card__label">Первый просмотр</span>
+            <span class="admin-kpi-card__value admin-kpi-card__value--sm" id="adminKpiFirst">—</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="admin-kpi-card__label">Последний просмотр</span>
+            <span class="admin-kpi-card__value admin-kpi-card__value--sm" id="adminKpiLast">—</span>
+          </div>
+        </div>
+
+        <!-- Аналитика по цветам кирпича -->
+        <div class="admin-section">
+          <h3 class="admin-section__title">Популярность цветов кирпича</h3>
+          <div id="adminColorsAnalytics" class="admin-bars-list"></div>
+        </div>
+
+        <!-- Аналитика по размерам и видам кладки -->
+        <div class="admin-grid-2col">
+          <div class="admin-section">
+            <h3 class="admin-section__title">Популярность размеров</h3>
+            <div id="adminSizesAnalytics" class="admin-bars-list"></div>
+          </div>
+          <div class="admin-section">
+            <h3 class="admin-section__title">Популярность видов кладки</h3>
+            <div id="adminLayoutsAnalytics" class="admin-bars-list"></div>
+          </div>
+        </div>
+
+        <!-- Таблица последних 50 просмотров -->
+        <div class="admin-section">
+          <h3 class="admin-section__title">Журнал последних 50 просмотров</h3>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th style="width: 44px;">№</th>
+                  <th style="width: 155px;">Дата и время</th>
+                  <th>Цвет кирпича</th>
+                  <th>Размер</th>
+                  <th>Вид кладки</th>
+                  <th>Раствор</th>
+                </tr>
+              </thead>
+              <tbody id="adminLogTableBody">
+                <tr><td colspan="6" class="admin-table-empty">Загрузка данных...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= МОЗАИКА ================= -->
+    <div id="mosaicModal" class="modal mosaic-modal" hidden>
+      <div class="modal__overlay" data-close-mosaic></div>
+      <div class="modal__content modal__content--mosaic">
+        <button class="modal__close" data-close-mosaic title="Закрыть окно">×</button>
+
+        <div class="mosaic-header">
+          <div class="mosaic-header__title-wrap">
+            <h2>🎨 Конструктор мозаики</h2>
+            <p class="modal__hint">Индивидуальные миксы цветов силикатного кирпича</p>
+          </div>
+        </div>
+
+        <div class="mosaic-body">
+          <div class="mosaic-columns">
+            <!-- Левая колонка: Цвета и проценты -->
+            <div class="mosaic-col-left">
+              <label class="mosaic-label" id="mosaicColorsLabel">Цвета и пропорции:</label>
+              
+              <div class="mosaic-colors-list" id="mosaicColorsList">
+                <!-- 6 цветов силикатного кирпича ЧЗСК -->
+              </div>
+            </div>
+
+            <!-- Правая колонка: Интерактивное превью -->
+            <div class="mosaic-col-right">
+              <label class="mosaic-label">Интерактивное превью кладки:</label>
+              <div class="mosaic-preview-card">
+                <canvas id="mosaicPreviewCanvas" width="260" height="150" class="mosaic-preview-canvas"></canvas>
+                <div class="mosaic-preview-info" id="mosaicPreviewInfo"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Кнопки управления -->
+          <div class="mosaic-actions">
+            <button id="mosaicApplyBtn" type="button" class="btn btn-primary btn-mosaic-apply">
+              Применить
+            </button>
+            <button id="mosaicResetMonochromeBtn" type="button" class="btn btn--outline">
+              Сбросить
+            </button>
+            <button type="button" class="btn btn--outline" data-close-mosaic>
+              Закрыть
+            </button>
+            <span id="mosaicStatus" class="mosaic-status-hint"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= СКРИПТЫ ================= -->
     <script type="module" src="js/main.js"></script>
-    <script type="module" src="js/view2d.js"></script> </body>
+    <script type="module" src="js/view2d.js"></script>
+    <script type="module" src="js/mosaic.js"></script>
+    <script type="module" src="js/cart.js"></script>
+    <script type="module" src="js/viewed.js"></script>
+    <script type="module" src="js/feedback.js"></script>
   </body>
 </html>
