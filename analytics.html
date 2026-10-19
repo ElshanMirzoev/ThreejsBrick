@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Панель администратора ЧЗСК • Аналитика просмотров</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      body.analytics-page {
+        background: #f0f4f8;
+        color: #2c3e50;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      .analytics-navbar {
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 14px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
+
+      .analytics-navbar__brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .analytics-navbar__logo {
+        height: 38px;
+        width: auto;
+      }
+
+      .analytics-navbar__title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+      }
+
+      .analytics-navbar__back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: #f1f5f9;
+        color: #334155;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.2s, color 0.2s;
+      }
+
+      .analytics-navbar__back-btn:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+
+      .analytics-main {
+        flex: 1;
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 32px 20px;
+        box-sizing: border-box;
+      }
+
+      /* Секция входа */
+      .analytics-auth-card {
+        max-width: 440px;
+        margin: 60px auto;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 36px 32px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2e8f0;
+        text-align: center;
+      }
+
+      .analytics-auth-card__icon {
+        width: 64px;
+        height: 64px;
+        background: #eff6ff;
+        color: #2563eb;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin: 0 auto 18px;
+      }
+
+      .analytics-auth-card h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 8px;
+      }
+
+      .analytics-auth-card p {
+        font-size: 14px;
+        color: #64748b;
+        margin: 0 0 24px;
+      }
+
+      .analytics-auth-input {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        box-sizing: border-box;
+        margin-bottom: 12px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      .analytics-auth-input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      }
+
+      .analytics-auth-submit {
+        width: 100%;
+        padding: 12px 20px;
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .analytics-auth-submit:hover {
+        background: #1d4ed8;
+      }
+
+      .analytics-auth-error {
+        color: #dc2626;
+        font-size: 13px;
+        margin-bottom: 14px;
+        padding: 8px 12px;
+        background: #fef2f2;
+        border-radius: 6px;
+        border: 1px solid #fee2e2;
+      }
+
+      .analytics-auth-hint {
+        margin-top: 24px;
+        padding-top: 18px;
+        border-top: 1px solid #f1f5f9;
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.5;
+        text-align: left;
+      }
+
+      /* Секция дашборда */
+      .analytics-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .analytics-header-row h1 {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+      }
+
+      .analytics-toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .analytics-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #334155;
+        transition: all 0.2s;
+      }
+
+      .analytics-btn:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+      }
+
+      .analytics-btn--export {
+        color: #0284c7;
+        border-color: #bae6fd;
+        background: #f0f9ff;
+      }
+
+      .analytics-btn--export:hover {
+        background: #e0f2fe;
+        border-color: #7dd3fc;
+      }
+
+      .analytics-btn--reset {
+        color: #dc2626;
+        border-color: #fecaca;
+        background: #fef2f2;
+      }
+
+      .analytics-btn--reset:hover {
+        background: #fee2e2;
+        border-color: #fca5a5;
+      }
+
+      .analytics-btn--logout {
+        color: #64748b;
+      }
+
+      /* KPI сетка */
+      .analytics-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+
+      .analytics-kpi-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+
+      .analytics-kpi-card__label {
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .analytics-kpi-card__value {
+        font-size: 28px;
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      .analytics-kpi-card__value--sm {
+        font-size: 16px;
+        font-weight: 600;
+        color: #334155;
+      }
+
+      /* Блоки дашборда */
+      .analytics-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+
+      .analytics-card__title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .analytics-card__title-badge {
+        font-size: 11px;
+        font-weight: 700;
+        background: #dcfce7;
+        color: #166534;
+        padding: 3px 8px;
+        border-radius: 12px;
+        text-transform: uppercase;
+      }
+
+      .analytics-grid-2col {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+
+      /* Живые цены */
+      .analytics-prices-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 12px;
+      }
+
+      .analytics-price-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .analytics-price-card__swatch {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        flex-shrink: 0;
+      }
+
+      .analytics-price-card__info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .analytics-price-card__title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .analytics-price-card__articul {
+        font-size: 11px;
+        color: #64748b;
+      }
+
+      .analytics-price-card__price {
+        font-size: 15px;
+        font-weight: 800;
+        color: #047857;
+        background: #ecfdf5;
+        padding: 4px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+      }
+
+      /* Прогресс бары */
+      .analytics-bars-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .analytics-bar-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .analytics-bar-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 13px;
+        color: #334155;
+      }
+
+      .analytics-bar-swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        display: inline-block;
+        margin-right: 6px;
+        vertical-align: middle;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .analytics-bar-name {
+        font-weight: 600;
+      }
+
+      .analytics-bar-count {
+        color: #64748b;
+        font-size: 12px;
+      }
+
+      .analytics-bar-track {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .analytics-bar-fill {
+        height: 100%;
+        background: #2563eb;
+        border-radius: 4px;
+        transition: width 0.4s ease;
+      }
+
+      /* Таблица */
+      .analytics-table-wrap {
+        overflow-x: auto;
+      }
+
+      .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        text-align: left;
+      }
+
+      .admin-table th {
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+        padding: 10px 12px;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .admin-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+      }
+
+      .admin-table tr:hover td {
+        background: #f8fafc;
+      }
+
+      .admin-table__date {
+        color: #64748b;
+        font-size: 12px;
+      }
+
+      .admin-table__color-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+      }
+
+      .admin-table__swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        display: inline-block;
+      }
+
+      .admin-table-empty {
+        text-align: center;
+        padding: 32px 16px;
+        color: #94a3b8;
+      }
+
+      .analytics-empty {
+        text-align: center;
+        padding: 24px;
+        color: #94a3b8;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body class="analytics-page">
+    <!-- Навбар -->
+    <header class="analytics-navbar">
+      <div class="analytics-navbar__brand">
+        <img class="analytics-navbar__logo" src="https://silicatbrick.ru/images/logos/8/logo8.png" alt="ЧЗСК" onerror="this.style.display='none';" />
+        <h1 class="analytics-navbar__title">Панель администратора • Аналитика ЧЗСК</h1>
+      </div>
+      <a href="index.html" class="analytics-navbar__back-btn" title="Вернуться к 3D-конструктору кирпича">
+        ← В конструктор
+      </a>
+    </header>
+
+    <main class="analytics-main">
+      <!-- 1. Секция авторизации (если пароль еще не введен) -->
+      <section id="authSection" class="analytics-auth-card">
+        <div class="analytics-auth-card__icon">🔒</div>
+        <h2>Вход в аналитику</h2>
+        <p>Панель предпочтений покупателей и статистики просмотров</p>
+
+        <form id="authForm" novalidate>
+          <input
+            type="password"
+            id="pinInput"
+            class="analytics-auth-input"
+            placeholder="Введите пароль администратора"
+            autocomplete="current-password"
+            required
+          />
+          <div id="authError" class="analytics-auth-error" hidden>
+            Неверный пароль. Попробуйте еще раз.
+          </div>
+          <button type="submit" class="analytics-auth-submit">
+            Войти в панель
+          </button>
+        </form>
+
+        <div class="analytics-auth-hint">
+          ⚙ <strong>Справка для сисадмина:</strong><br />
+          Пароль задается в файле <code>password.json</code> в корне сайта.<br />
+          Вы можете открыть этот файл в Блокноте и в любой момент сменить пароль.
+        </div>
+      </section>
+
+      <!-- 2. Секция дашборда (отображается после успешного ввода пароля) -->
+      <section id="dashboardSection" hidden>
+        <!-- Шапка дашборда с кнопками -->
+        <div class="analytics-header-row">
+          <h1>Сводка просмотров кирпича</h1>
+          <div class="analytics-toolbar">
+            <button id="exportCsvBtn" class="analytics-btn analytics-btn--export" type="button" title="Выгрузить данные в файл Excel">
+              📥 Экспорт в CSV
+            </button>
+            <button id="resetStatsBtn" class="analytics-btn analytics-btn--reset" type="button" title="Сбросить всю статистику просмотров">
+              🗑 Сбросить статистику
+            </button>
+            <button id="logoutBtn" class="analytics-btn analytics-btn--logout" type="button" title="Завершить сессию администратора">
+              🔒 Выйти
+            </button>
+          </div>
+        </div>
+
+        <!-- Карточки KPI -->
+        <div class="analytics-kpi-grid">
+          <div class="analytics-kpi-card">
+            <span class="analytics-kpi-card__label">Всего просмотров</span>
+            <span class="analytics-kpi-card__value" id="kpiTotal">0</span>
+          </div>
+          <div class="analytics-kpi-card">
+            <span class="analytics-kpi-card__label">Уникальных сочетаний</span>
+            <span class="analytics-kpi-card__value" id="kpiUnique">0</span>
+          </div>
+          <div class="analytics-kpi-card">
+            <span class="analytics-kpi-card__label">Первый просмотр</span>
+            <span class="analytics-kpi-card__value analytics-kpi-card__value--sm" id="kpiFirst">—</span>
+          </div>
+          <div class="analytics-kpi-card">
+            <span class="analytics-kpi-card__label">Последний просмотр</span>
+            <span class="analytics-kpi-card__value analytics-kpi-card__value--sm" id="kpiLast">—</span>
+          </div>
+        </div>
+
+        <!-- Актуальные цены с сайта завода -->
+        <div class="analytics-card">
+          <h2 class="analytics-card__title">
+            🛒 Актуальные цены с сайта завода
+            <span class="analytics-card__title-badge">онлайн-синхронизация</span>
+          </h2>
+          <div id="livePricesList" class="analytics-prices-grid">
+            <!-- Заполняется динамически из js/prices.js -->
+          </div>
+        </div>
+
+        <!-- Популярность цветов кирпича -->
+        <div class="analytics-card">
+          <h2 class="analytics-card__title">🎨 Популярность цветов кирпича</h2>
+          <div id="colorsAnalytics" class="analytics-bars-list">
+            <!-- Заполняется динамически -->
+          </div>
+        </div>
+
+        <!-- 2 колонки: Размеры и Виды кладки -->
+        <div class="analytics-grid-2col">
+          <div class="analytics-card">
+            <h2 class="analytics-card__title">📐 Популярность размеров</h2>
+            <div id="sizesAnalytics" class="analytics-bars-list">
+              <!-- Заполняется динамически -->
+            </div>
+          </div>
+          <div class="analytics-card">
+            <h2 class="analytics-card__title">🧱 Популярность видов кладки</h2>
+            <div id="layoutsAnalytics" class="analytics-bars-list">
+              <!-- Заполняется динамически -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Таблица последних просмотров -->
+        <div class="analytics-card">
+          <h2 class="analytics-card__title">📋 Журнал последних 50 просмотров</h2>
+          <div class="analytics-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th style="width: 44px;">№</th>
+                  <th style="width: 160px;">Дата и время</th>
+                  <th>Цвет кирпича</th>
+                  <th>Размер</th>
+                  <th>Вид кладки</th>
+                  <th>Цвет раствора</th>
+                </tr>
+              </thead>
+              <tbody id="logTableBody">
+                <tr><td colspan="6" class="admin-table-empty">Загрузка данных...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="js/analytics.js"></script>
+  </body>
+</html>

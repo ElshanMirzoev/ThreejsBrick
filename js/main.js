@@ -81,6 +81,9 @@ const cameraLimits = {
   maxTargetX: null,
   minTargetZ: null,
   maxTargetZ: null,
+
+  modelBox: null,
+  customMinDistance: null,
 };
 
 // Мобильная оптимизация Three.js (плавность 60 FPS без лагов и перегрева)
@@ -308,7 +311,7 @@ function setupControls() {
   controls.dampingFactor = 0.05;
   controls.enableRotate = true;
   controls.enableZoom = true;
-  controls.enablePan = false;
+  controls.enablePan = true;
   controls.screenSpacePanning = true;
   controls.minDistance = 0.1;
   controls.maxDistance = 100000;
@@ -322,6 +325,30 @@ function setupControls() {
   controls._hasPanClamp = true;
 }
 setupControls();
+
+// Двойной клик на модели: фокусирует камеру на выбранном участке стены/фасада
+const clickRaycaster = new THREE.Raycaster();
+const clickMouse = new THREE.Vector2();
+
+if (container) {
+  container.addEventListener("dblclick", (event) => {
+    if (!currentModel || !camera || !controls || !renderer) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    clickMouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    clickMouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    clickRaycaster.setFromCamera(clickMouse, camera);
+    const intersects = clickRaycaster.intersectObject(currentModel, true);
+    if (intersects.length > 0) {
+      const hit = intersects[0].point;
+      controls.target.copy(hit);
+      updateDynamicMinDistance();
+      controls.update();
+      requestRender(30);
+    }
+  });
+}
 
 // Окружение EXR
 const exrLoader = new EXRLoader();
@@ -475,6 +502,8 @@ function fitCameraToObject(obj, opts = {}) {
     offset = 1.35,
     azimuthDeg = 222,
     startHeightRatio = 0.25,
+    cameraHeightRatio = null,
+    distance = null,
     minZoomRatio = 0.45,
     maxZoomRatio = 2.0,
     minDistance = null,
@@ -508,16 +537,20 @@ function fitCameraToObject(obj, opts = {}) {
   // Базовая дистанция
   const fovRad = THREE.MathUtils.degToRad(camera.fov);
   const half = maxDim * 0.5;
-  let baseDistance = (half / Math.tan(fovRad / 2)) * offset;
-  const minBase = Math.max(0.5, maxDim * 0.6);
-  baseDistance = Math.max(baseDistance, minBase);
+  let baseDistance = distance !== null ? distance : ((half / Math.tan(fovRad / 2)) * offset);
+  if (distance === null) {
+    const minBase = Math.max(0.5, maxDim * 0.6);
+    baseDistance = Math.max(baseDistance, minBase);
+  }
 
   // Позиция камеры
   const az = THREE.MathUtils.degToRad(azimuthDeg);
 
   const camX = center.x + Math.sin(az) * baseDistance;
   const camZ = center.z + Math.cos(az) * baseDistance;
-  const camY = targetY + height * 0.1;
+  const camY = cameraHeightRatio !== null
+    ? (groundY + height * cameraHeightRatio)
+    : (targetY + height * 0.1);
 
   camera.position.set(camX, camY, camZ);
 
@@ -540,26 +573,21 @@ function fitCameraToObject(obj, opts = {}) {
   // Контроллер
   controls.target.set(center.x, targetY, center.z);
 
-  // Геометро-безопасная минимальная дистанция (камера не проваливается сквозь стены и столбы)
-  const halfX = size.x * 0.5;
-  const halfZ = size.z * 0.5;
-  const cornerRadius = Math.hypot(halfX, halfZ);
-  const safeMinDist = cornerRadius * 1.10;
+  // Сохраняем модель и коробку для динамического расчета безопасного зума и границ
+  cameraLimits.modelBox = box.clone();
+  cameraLimits.customMinDistance = minDistance;
 
-  if (minDistance !== null) {
-    controls.minDistance = Math.max(minDistance, safeMinDist);
-  } else {
-    controls.minDistance = Math.max(baseDistance * minZoomRatio, safeMinDist);
-  }
-  controls.maxDistance = maxDistance !== null ? maxDistance : baseDistance * maxZoomRatio;
-
-  controls.minPolarAngle = THREE.MathUtils.degToRad(20);
-  controls.maxPolarAngle = THREE.MathUtils.degToRad(80);
+  controls.maxDistance = maxDistance !== null ? maxDistance : Math.max(100, baseDistance * maxZoomRatio);
+  controls.minPolarAngle = THREE.MathUtils.degToRad(15);
+  controls.maxPolarAngle = THREE.MathUtils.degToRad(88);
   controls.enableZoom = true;
+  controls.enablePan = true;
+
+  updateDynamicMinDistance();
   controls.update();
 
   // Границы для панорамирования
-  const margin = maxDim * 0.3; // можно чуть выезжать за дом, но недалеко
+  const margin = maxDim * 0.35; // можно панорамировать по всей ширине фасада
 
   cameraLimits.minTargetY = groundY + height * 0.05;
   cameraLimits.minCameraY = groundY + height * 0.05;
@@ -574,6 +602,57 @@ function fitCameraToObject(obj, opts = {}) {
     controls.addEventListener("change", clampCameraPan);
     controls._hasPanClamp = true;
   }
+}
+
+// Адаптивный расчет безопасного приближения (зума) по лучу от target к камере
+function updateDynamicMinDistance() {
+  if (!controls || !camera || !cameraLimits.modelBox) return;
+
+  const box = cameraLimits.modelBox;
+  const t = controls.target;
+  const p = camera.position;
+
+  const dx = p.x - t.x;
+  const dy = p.y - t.y;
+  const dz = p.z - t.z;
+  const len = Math.hypot(dx, dy, dz);
+  if (len < 0.001) return;
+
+  const dirX = dx / len;
+  const dirY = dy / len;
+  const dirZ = dz / len;
+
+  let tExit = Infinity;
+  if (dirX > 0.0001) {
+    const d = (box.max.x - t.x) / dirX;
+    if (d > 0 && d < tExit) tExit = d;
+  } else if (dirX < -0.0001) {
+    const d = (box.min.x - t.x) / dirX;
+    if (d > 0 && d < tExit) tExit = d;
+  }
+
+  if (dirZ > 0.0001) {
+    const d = (box.max.z - t.z) / dirZ;
+    if (d > 0 && d < tExit) tExit = d;
+  } else if (dirZ < -0.0001) {
+    const d = (box.min.z - t.z) / dirZ;
+    if (d > 0 && d < tExit) tExit = d;
+  }
+
+  if (dirY > 0.0001) {
+    const d = (box.max.y - t.y) / dirY;
+    if (d > 0 && d < tExit) tExit = d;
+  } else if (dirY < -0.0001) {
+    const d = (box.min.y - t.y) / dirY;
+    if (d > 0 && d < tExit) tExit = d;
+  }
+
+  // Запас 0.8м от геометрии фасада/стен, чтобы камера не проваливалась внутрь
+  const margin = 0.8;
+  const safeDist = (tExit !== Infinity && tExit > 0) ? (tExit + margin) : 0.5;
+
+  const customMin = cameraLimits.customMinDistance !== null ? cameraLimits.customMinDistance : 0.5;
+  controls.minDistance = Math.max(customMin, safeDist);
 }
 
 function clampCameraPan() {
@@ -615,6 +694,8 @@ function clampCameraPan() {
       p.z += dz;
     }
   }
+
+  updateDynamicMinDistance();
 }
 
 // Глубокое копирование материала вместе с текстурами (для отката)
@@ -660,12 +741,15 @@ async function loadConfig() {
   }
 }
 
+let currentModelLoadToken = 0;
+
 // Загрузка модели по ключу
 function loadModelByKey(key) {
   const cfg = MODELS_CONFIG[key];
   if (!cfg) return Promise.reject(new Error(`Неизвестный ключ модели: ${key}`));
 
   unloadCurrentModel();
+  const token = ++currentModelLoadToken;
 
   const attemptLoad = (path) =>
     new Promise((resolveAttempt, rejectAttempt) => {
@@ -700,6 +784,12 @@ function loadModelByKey(key) {
 
       if (!gltf) throw new Error("Не удалось загрузить модель");
 
+      if (token !== currentModelLoadToken) {
+        disposeObject(gltf.scene);
+        return;
+      }
+
+      currentModelKey = key;
       currentModel = gltf.scene;
       scene.add(currentModel);
 
@@ -893,17 +983,17 @@ function findExactTextureByTags(selection) {
 export function mapBrickColor(tagColor) {
   switch (tagColor) {
     case "gray":
-      return "#a8b0b8"; // Серо-голубой
+      return "#a8b0b8"; // Рядовой (пустотелый)
     case "gray2":
-      return "#8f9ba5"; // Тёмно-серый
+      return "#8f9ba5"; // Графит
     case "pink":
-      return "#e8a89a"; // Розово-персиковый
+      return "#e8a89a"; // Красный
     case "peach":
-      return "#f0b8a0"; // Персиковый
+      return "#f0b8a0"; // Оранжевый
     case "beige":
-      return "#e8d4a8"; // Бежево-кремовый
+      return "#e8d4a8"; // Желтый
     case "cream":
-      return "#f0e8d8"; // Кремово-белый
+      return "#f0e8d8"; // Разнотон
     default:
       return "#d4d4d4";
   }
@@ -924,9 +1014,9 @@ export function mapBrickPixelSize(sizeTag) {
   // Примитивное различие высоты кирпича по размеру
   switch (sizeTag) {
     case "250x120x88":
-      return [120, 40];
+      return [240, 80];
     case "250x120x65":
-      return [120, 32];
+      return [240, 64];
     default:
       return [50, 20];
   }
@@ -1037,7 +1127,7 @@ export function createBrickCanvas(params, existingCanvas = null) {
   for (let yCount = 0; yCount < countY; yCount++) {
     const y = yCount * stepY;
 
-    // КЛАДКА 2: 3 ряда ложковых, 1 ряд тычковый (Пачка из 4 рядов)
+    // Кладка 2: 3 ряда ложковых, 1 ряд тычковый (пачка из 4 рядов)
     if (layout === "multirow") {
       const isHeaderRow = (yCount % 4 === 3); 
 
@@ -1088,7 +1178,7 @@ export function createBrickCanvas(params, existingCanvas = null) {
       }
     }
 
-    // КЛАДКА 3: 5 рядов ложковых, 1 ряд тычковый (Пачка из 6 рядов)
+    // Кладка 3: 5 рядов ложковых, 1 ряд тычковый (пачка из 6 рядов)
     else if (layout === "multirow_5_1") {
       const isHeaderRow = (yCount % 6 === 5); 
 
@@ -1370,7 +1460,7 @@ function applyMatchedTextureToTarget(matchedCfg) {
     if (activeZoneTextures.accent) {
       applyBrickTextureToMaterial("BricksAccent", { ...canvasParams, ...activeZoneTextures.accent }, brickScale, currentOffset);
     } else {
-      // ИСПРАВЛЕНИЕ: Применяем тот же выбранный кирпич, чтобы вся модель окрашивалась на 100% целиком
+      // Применяем тот же выбранный кирпич, чтобы вся модель окрашивалась целиком
       applyBrickTextureToMaterial("BricksAccent", canvasParams, brickScale, currentOffset);
     }
   }
@@ -1603,7 +1693,7 @@ export function updateColorAvailabilityBySize() {
         radio.disabled = false;
         if (label) {
           label.classList.remove("color-tile-disabled");
-          label.setAttribute("title", "Серо-голубой (рядовой 200/50)");
+          label.setAttribute("title", "Рядовой (полнотелый)");
         }
       }
     } else {
@@ -1611,12 +1701,12 @@ export function updateColorAvailabilityBySize() {
       if (label) {
         label.classList.remove("color-tile-disabled");
         const originalTitles = {
-          gray: "Серо-голубой",
-          gray2: "Тёмно-серый",
-          pink: "Розово-персиковый",
-          peach: "Персиковый",
-          beige: "Бежево-кремовый",
-          cream: "Кремово-белый",
+          gray: "Рядовой (пустотелый)",
+          gray2: "Графит",
+          pink: "Красный",
+          peach: "Оранжевый",
+          beige: "Желтый",
+          cream: "Разнотон",
         };
         label.setAttribute("title", originalTitles[radio.value] || "");
       }
@@ -1636,7 +1726,7 @@ export function updateColorAvailabilityBySize() {
   }
 }
 
-// ================= СОХРАНЕНИЕ И ВОССТАНОВЛЕНИЕ СОСТОЯНИЯ =================
+// Сохранение и восстановление состояния
 const STATE_STORAGE_KEY = "threejsbrick_active_state_v1";
 
 function saveActiveState() {

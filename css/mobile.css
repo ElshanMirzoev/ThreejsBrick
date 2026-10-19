@@ -1,11 +1,7 @@
-/* ==========================================================================
    MOBILE & TABLET RESPONSIVE STYLES (ThreejsBrick Configurator)
    Оптимизация для смартфонов и планшетов (iOS Safari, Android Chrome/Edge)
-   ========================================================================== */
 
-/* --------------------------------------------------------------------------
    БРЕЙКПОИНТ: ПЛАНШЕТЫ И СМАРТФОНЫ (<= 768px)
-   -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
   /* Глобальный правильный бокс-моделинг для мобильных и сброс тапа */
   *,
@@ -34,7 +30,7 @@
     width: 100%;
   }
 
-  /* --- ШАПКА И ЛОГОТИП --- */
+  /* Шапка и логотип */
   .site-header__brand {
     flex-direction: column;
     align-items: center;
@@ -72,7 +68,7 @@
     width: 100%;
   }
 
-  /* --- ПАНЕЛЬ КОНФИГУРАТОРА --- */
+  /* Панель конфигуратора */
   .panel {
     gap: 12px;
     width: 100%;
@@ -121,7 +117,7 @@
     width: 100%;
   }
 
-  /* --- ПЛИТКИ ЦВЕТОВ КИРПИЧА И РАСТВОРА --- */
+  /* Плитки цветов кирпича и раствора */
   /* Размер увеличен минимум до 40-44px с хорошим отступом */
   #color-brick-options,
   #color-rastvor-options {
@@ -179,7 +175,7 @@
     white-space: normal;
   }
 
-  /* --- РАЗМЕРЫ КИРПИЧА И ВИДЫ КЛАДКИ: КНОПКИ-ЧИПСЫ С ТАЧ-ЗОНОЙ ОТ 40px --- */
+  /* Размеры кирпича и виды кладки: кнопки-чипсы с тач-зоной от 40px */
   #size-options label {
     flex: 1 1 calc(50% - 6px);
     width: auto;
@@ -242,7 +238,7 @@
     box-shadow: 0 2px 6px rgba(211, 84, 0, 0.15);
   }
 
-  /* --- ПОЛЗУНОК МАСШТАБА КЛАДКИ НА ВСЮ ШИРИНУ БЛОКА --- */
+  /* Ползунок масштаба кладки на всю ширину блока */
   .slider-wrap {
     width: 100%;
     display: flex;
@@ -263,7 +259,7 @@
     text-align: right;
   }
 
-  /* --- 3D И 2D ОКНО ПРОСМОТРА --- */
+  /* 3D и 2D окно просмотра */
   /* Высота ограничена 48vh (min 290px, max 440px), чтобы пользователь мог проскроллить страницу пальцем! */
   .viewer-canvas,
   #container3D,
@@ -298,8 +294,8 @@
     font-size: 28px;
   }
 
-  /* --- КНОПКИ ДЕЙСТВИЙ (.actions-row) --- */
-  /* Сетка для 3 кнопок: 2 в первом ряду, Сброс на всю ширину во втором */
+  /* Кнопки действий (.actions-row) */
+  /* Сетка 2×2: Калькулятор и Мозаика в 1-м ряду, 2D Просмотр и Сброс во 2-м */
   .actions-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -309,7 +305,7 @@
   }
 
   #resetBtn {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
 
   .actions-row .btn {
@@ -323,6 +319,15 @@
     align-items: center;
     justify-content: center;
     text-align: center;
+    box-sizing: border-box;
+  }
+
+  .actions-row .calc-btn-icon,
+  .actions-row .mosaic-btn-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    flex-shrink: 0;
   }
 
   .status-text {
@@ -332,7 +337,7 @@
     margin-top: 2px;
   }
 
-  /* --- КОРЗИНА И ПЛАВАЮЩАЯ КНОПКА (FAB) --- */
+  /* Корзина и плавающая кнопка (FAB) */
   .cart-fab {
     bottom: 18px;
     right: 18px;
@@ -406,7 +411,7 @@
     justify-content: center;
   }
 
-  /* --- КНОПКИ ОБРАТНОЙ СВЯЗИ --- */
+  /* Кнопки обратной связи */
   .feedback-buttons {
     margin: 20px auto 40px;
     padding: 0 12px;
@@ -424,7 +429,7 @@
     justify-content: center;
   }
 
-  /* --- СЕКЦИЯ: НЕДАВНО ПРОСМОТРЕННЫЕ --- */
+  /* Секция: недавно просмотренные */
   .viewed-section {
     margin: 24px auto;
     padding: 0 12px;
@@ -468,7 +473,7 @@
     height: 46px;
   }
 
-  /* --- МОДАЛЬНЫЕ ОКНА --- */
+  /* Модальные окна */
   .modal__content,
   .modal__content--wide,
   .modal__content--mosaic,
@@ -524,7 +529,7 @@
     margin-top: 6px;
   }
 
-  /* --- МОДАЛКА: МОЗАИКА --- */
+  /* Модалка: мозаика */
   .mosaic-columns {
     display: flex !important;
     flex-direction: column !important;
@@ -603,7 +608,7 @@
     transform: none;
   }
 
-  /* --- МОДАЛКА: ПАНЕЛЬ АДМИНИСТРАТОРА --- */
+  /* Модалка: панель администратора */
   .admin-header {
     flex-direction: column;
     align-items: stretch;
@@ -643,7 +648,7 @@
     min-width: 520px;
   }
 
-  /* --- ПОДВАЛ --- */
+  /* Подвал */
   .site-footer {
     padding: 16px 14px;
     width: 100%;
@@ -662,9 +667,7 @@
   }
 }
 
-/* --------------------------------------------------------------------------
    БРЕЙКПОИНТ: КОМПАКТНЫЕ СМАРТФОНЫ (<= 480px)
-   -------------------------------------------------------------------------- */
 @media (max-width: 480px) {
   header,
   .site-header {
@@ -737,3 +740,628 @@
     min-width: 190px;
   }
 }
+
+   АДАПТИВНЫЕ СТИЛИ ДЛЯ КАЛЬКУЛЯТОРА КИРПИЧЕЙ (ПЛАНШЕТЫ И СМАРТФОНЫ)
+
+   1. Планшеты и компактные экраны (<= 1024px)
+@media (max-width: 1024px) {
+  .modal__content--calc {
+    width: calc(100% - 32px);
+    max-width: 940px;
+    max-height: 90vh;
+    padding: 24px 22px;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .calc-body {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 20px;
+  }
+
+  .calc-presets-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .calc-preset-btn {
+    min-height: 40px;
+    font-size: 0.8rem;
+    padding: 6px 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.2;
+  }
+}
+
+   2. Вертикальные планшеты и узкие экраны (<= 900px)
+@media (max-width: 900px) {
+  .calc-body {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 18px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .calc-col-params,
+  .calc-col-summary {
+    min-width: 0 !important;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .calc-col-summary {
+    position: static;
+  }
+
+  .modal__content--calc {
+    padding: 22px 18px;
+    max-height: 92vh;
+  }
+}
+
+   3. Смартфоны и мобильные устройства (<= 768px)
+@media (max-width: 768px) {
+  .modal__content--calc {
+    width: calc(100% - 16px);
+    max-height: 94vh;
+    padding: 16px 12px 20px;
+    border-radius: 14px;
+    margin: 8px auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Кнопка закрытия модалки */
+  .modal__content--calc .modal__close {
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  /* Заголовок модального окна */
+  .calc-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    padding-right: 36px;
+    position: relative;
+  }
+
+  .calc-header h2 {
+    font-size: 1.15rem;
+    line-height: 1.25;
+    margin-bottom: 4px;
+  }
+
+  .calc-header .modal__hint {
+    font-size: 0.76rem;
+    line-height: 1.35;
+    margin: 0;
+  }
+
+  /* Предотвращение автозума на iOS Safari (font-size >= 16px) и удобные тап-зоны */
+  #calcModal input[type="number"],
+  #calcModal select {
+    font-size: 16px !important;
+    min-height: 44px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  /* Секции калькулятора */
+  .calc-section {
+    padding: 12px 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .calc-section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .calc-label {
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+  }
+
+  .calc-sublabel {
+    font-size: 0.78rem;
+    margin-bottom: 6px;
+  }
+
+  /* Табы режима ввода геометрии */
+  .calc-tabs-mode {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    background: #edf2f7;
+    padding: 3px;
+    border-radius: 8px;
+    gap: 2px;
+    box-sizing: border-box;
+  }
+
+  .calc-tab-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 36px;
+    padding: 6px 2px;
+    font-size: clamp(0.7rem, 2.7vw, 0.78rem);
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+
+  /* Компактная двухколоночная сетка для полей ввода */
+  .calc-fields-grid {
+    display: grid;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #calcPerimeterGroup {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #calcPerimeterGroup .calc-field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  #calcDimensionsGroup {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #calcAreaGroup {
+    grid-template-columns: 1fr;
+  }
+
+  .calc-field {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .calc-field label {
+    font-size: 0.78rem;
+    margin-bottom: 3px;
+  }
+
+  .calc-field-hint {
+    font-size: 0.7rem;
+    line-height: 1.2;
+    margin-top: 2px;
+  }
+
+  /* Выпадающее меню способа кладки */
+  #calcMasonrySelect.calc-select-large {
+    min-height: 46px;
+    font-size: 16px !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Подстрока параметров (Размер кирпича + Запас) */
+  .calc-params-subrow {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Радиокнопки как большие мобильные плашки */
+  .calc-inline-radios {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .calc-inline-radios label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-sizing: border-box;
+    width: 100%;
+    transition: all 0.15s ease;
+  }
+
+  .calc-inline-radios label:active {
+    background: #f8fafc;
+  }
+
+  .calc-inline-radios input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  /* Переключатель Мозаика / Один цвет в шапке секции 3 */
+  .calc-section-header .calc-inline-radios {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  /* Панель действий мозаики */
+  .calc-mosaic-actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .calc-mosaic-actions-bar .calc-sublabel {
+    font-size: 0.78rem;
+    margin-bottom: 0;
+  }
+
+  #calcSync3DBtn {
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Список ползунков цветов мозаики */
+  .calc-colors-sliders-list {
+    padding: 8px 6px;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .calc-color-row {
+    padding: 8px 8px;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .calc-color-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .calc-color-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .calc-color-checkbox {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .calc-color-swatch {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border-radius: 4px;
+  }
+
+  .calc-color-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .calc-color-price {
+    font-size: 0.72rem;
+    color: #64748b;
+    white-space: nowrap;
+    margin-left: 2px;
+  }
+
+  .calc-pct-badge {
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .calc-slider-row {
+    padding-left: 0;
+    margin-top: 6px;
+    width: 100%;
+  }
+
+  .calc-slider {
+    width: 100%;
+    height: 34px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .calc-slider::-webkit-slider-runnable-track {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+  }
+
+  .calc-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin-top: -8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    border: 2px solid #fff;
+  }
+
+  .calc-slider::-moz-range-track {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+  }
+
+  .calc-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    border: 2px solid #fff;
+  }
+
+  #calcSingleControls select {
+    width: 100%;
+    min-height: 44px;
+    font-size: 16px !important;
+    margin-top: 6px;
+  }
+
+  /* Итоговая смета (Правая колонка) */
+  .calc-summary-card {
+    padding: 14px 10px;
+    border-radius: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .calc-summary-header {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+  }
+
+  .calc-summary-header h3 {
+    font-size: 1.02rem;
+  }
+
+  .calc-hero-cost {
+    padding: 12px 10px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .calc-hero-label {
+    font-size: 0.72rem;
+    line-height: 1.25;
+  }
+
+  .calc-hero-value {
+    font-size: clamp(1.4rem, 5.5vw, 1.85rem);
+    line-height: 1.15;
+    margin: 4px 0;
+    word-break: break-word;
+  }
+
+  .calc-hero-sub {
+    font-size: 0.7rem;
+  }
+
+  .calc-ratio-container {
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  .calc-ratio-bar {
+    height: 20px;
+    border-radius: 5px;
+    width: 100%;
+  }
+
+  .calc-ratio-segment {
+    font-size: 0.68rem;
+  }
+
+  .calc-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  .calc-stat-item {
+    padding: 8px 8px;
+    border-radius: 6px;
+  }
+
+  .calc-stat-num {
+    font-size: 1rem;
+  }
+
+  .calc-stat-lbl {
+    font-size: 0.68rem;
+    line-height: 1.2;
+  }
+
+  /* Таблица сметы: горизонтальная прокрутка и четкая верстка */
+  .calc-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    max-height: 200px;
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+  }
+
+  .calc-estimate-table {
+    width: 100%;
+    min-width: 275px;
+    font-size: 0.72rem;
+    border-collapse: collapse;
+  }
+
+  .calc-estimate-table th,
+  .calc-estimate-table td {
+    padding: 6px 3px;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .calc-estimate-table th:first-child,
+  .calc-estimate-table td:first-child {
+    text-align: left;
+    padding-left: 4px;
+  }
+
+  .calc-estimate-table th:last-child,
+  .calc-estimate-table td:last-child {
+    padding-right: 4px;
+  }
+
+  .calc-tbl-color {
+    gap: 4px;
+    max-width: 88px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .calc-tbl-color strong {
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .calc-color-swatch-sm {
+    width: 12px;
+    height: 12px;
+  }
+
+  .calc-note {
+    font-size: 0.7rem;
+    line-height: 1.35;
+    margin-bottom: 12px;
+  }
+
+  /* Главная кнопка корзины */
+  #calcAddToCartBtn.calc-btn-add-cart {
+    width: 100%;
+    max-width: 100%;
+    min-height: 48px;
+    padding: 12px 10px;
+    font-size: clamp(0.82rem, 3.2vw, 0.95rem);
+    font-weight: 700;
+    border-radius: 10px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  /* Всплывающий тост */
+  .calc-toast {
+    left: 12px;
+    right: 12px;
+    bottom: 16px;
+    padding: 12px 16px;
+    font-size: 0.84rem;
+    text-align: center;
+    border-radius: 8px;
+  }
+}
+
+   4. Экстра-узкие экраны смартфонов (<= 480px)
+@media (max-width: 480px) {
+  .calc-presets-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .calc-preset-btn {
+    width: 100%;
+    min-height: 38px;
+    font-size: 0.78rem;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .calc-section-header .calc-inline-radios {
+    grid-template-columns: 1fr;
+  }
+
+  .calc-tab-btn {
+    font-size: 0.7rem;
+    padding: 6px 1px;
+  }
+
+  .calc-tbl-color {
+    max-width: 82px;
+  }
+}
+
+

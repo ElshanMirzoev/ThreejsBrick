@@ -1,7 +1,7 @@
 // js/view2d.js
 import { createBrickCanvas, getActiveZoneTextures, applySelectionToLoadedModel } from './main.js';
 
-// ============ DOM ============
+// DOM
 const view2DBtn   = document.getElementById("view2DBtn");
 const card3D      = document.getElementById("card3D");
 const card2D      = document.getElementById("card2D");
@@ -9,7 +9,7 @@ const container2D = document.getElementById("container2D");
 const resetBtn    = document.getElementById("resetBtn");
 const statusEl    = document.getElementById("status");
 
-// ============ Геттеры ============
+// Геттеры
 const radiosSize         = () => Array.from(document.querySelectorAll('input[name="size"]'));
 const radiosLayout       = () => Array.from(document.querySelectorAll('input[name="layout"]'));
 const radiosColorBrick   = () => Array.from(document.querySelectorAll('input[name="color_brick"]'));
@@ -20,7 +20,7 @@ function getCheckedValue(nodeList) {
   return n ? n.value : "";
 }
 
-// ============ Маппинг (СОГЛАСОВАНО с main.js!) ============
+// Маппинг (согласовано с main.js!)
 function mapBrickColor(tag) {
   switch (tag) {
     case "gray":   return "#a8b0b8";
@@ -66,7 +66,7 @@ function getOrCreate2DCanvas() {
   return canvas;
 }
 
-// ============ Отрисовка 2D ============
+// Отрисовка 2D
 export function render2DWall() {
   if (card3D) card3D.style.display = "none";
   if (card2D) card2D.style.display = "block";
@@ -102,7 +102,7 @@ export function render2DWall() {
   if (statusEl) console.log("[2D] Плоская кладка обновлена без пересоздания канваса:", checkedBrickKey);
 }
 
-// ============ Инициализация ============
+// Инициализация
 function init2DModule() {
   if (!view2DBtn) {
     console.warn("[2D] Кнопка #view2DBtn не найдена");
@@ -184,7 +184,7 @@ function init2DModule() {
   toggleAvailability();
 }
 
-// ============ Старт ============
+// Старт
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init2DModule);
 } else {

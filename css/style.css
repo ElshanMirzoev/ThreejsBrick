@@ -1,4 +1,4 @@
-/* --- СИСТЕМНЫЕ ПЕРЕМЕННЫЕ И БАЗОВЫЕ СТИЛИ (100% автономно, без внешних шрифтов) --- */
+/* Системные переменные и базовые стили (100% автономно, без внешних шрифтов) */
 :root {
     --primary: #d35400;
     --primary-light: #fff4ed;
@@ -19,7 +19,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* --- СТРУКТУРНЫЕ БЛОКИ И СЕТКА --- */
+/* Структурные блоки и сетка */
 header, .site-header {
     max-width: 1200px;
     margin: 0 auto;
@@ -102,7 +102,7 @@ main {
     padding: 0 20px 20px;
 }
 
-/* --- ЭЛЕМЕНТЫ УПРАВЛЕНИЯ (СЕЛЕКТЫ И ПЛИТКИ) --- */
+/* Элементы управления (селекты и плитки) */
 #model-select {
     width: 100%;
     padding: 12px;
@@ -180,7 +180,7 @@ main {
     opacity: 1;
 }
 
-/* --- ПАЛИТРА ЦВЕТОВ (Заливка плиток) --- */
+/* Палитра цветов (заливка плиток) */
 label:has(input[name="color_brick"][value="gray"])   { background-color: #a8b0b8 !important; }
 label:has(input[name="color_brick"][value="gray2"])  { background-color: #8f9ba5 !important; }
 label:has(input[name="color_brick"][value="pink"])   { background-color: #e8a89a !important; }
@@ -209,7 +209,7 @@ label.color-tile-disabled,
     transform: none !important;
 }
 
-/* --- СХЕМЫ И ИКОНКИ (Размеры и Виды кладки) --- */
+/* Схемы и иконки (размеры и виды кладки) */
 #size-options label::before, 
 #layout-options label::before {
     content: "";
@@ -247,7 +247,7 @@ label:has(input[value="250x120x88"])::before {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect x="5" y="10" width="30" height="20" fill="none" stroke="black" stroke-width="2"/></svg>');
 }
 
-/* --- КНОПКИ УПРАВЛЕНИЯ БЛОКА --- */
+/* Кнопки управления блока */
 .actions-row {
     display: flex;
     align-items: center;
@@ -322,7 +322,7 @@ label:has(input[value="250x120x88"])::before {
     color: var(--text-muted);
 }
 
-/* --- КАРТОЧКИ ВИЗУАЛИЗАЦИИ (3D И 2D) --- */
+/* Карточки визуализации (3D и 2D) */
 .viewer-card {
     background: #fff;
     border-radius: var(--radius);
@@ -397,12 +397,12 @@ label:has(input[value="250x120x88"])::before {
     margin: 0;
 }
 
-/* --- ПОЛЗУНОК РАЗМЕРА КЛАДКИ (скрыт полностью) --- */
+/* Ползунок размера кладки (скрыт полностью) */
 fieldset:has(#brick-scale-slider) {
     display: none !important;
 }
 
-/* --- КОРЗИНА И ПАНЕЛЬ ДОБАВЛЕНИЯ --- */
+/* Корзина и панель добавления */
 .cart-fab {
   position: fixed;
   right: 24px;
@@ -468,7 +468,7 @@ fieldset:has(#brick-scale-slider) {
   margin-left: auto;
 }
 
-/* --- КНОПКИ ОБРАТНОЙ СВЯЗИ --- */
+/* Кнопки обратной связи */
 .feedback-buttons {
   max-width: 1200px;
   margin: 24px auto 60px;
@@ -479,7 +479,7 @@ fieldset:has(#brick-scale-slider) {
   flex-wrap: wrap;
 }
 
-/* --- МОДАЛКИ --- */
+/* Модалки */
 .modal {
   position: fixed;
   inset: 0;
@@ -526,7 +526,7 @@ fieldset:has(#brick-scale-slider) {
   margin-bottom: 16px;
 }
 
-/* --- Элементы корзины --- */
+/* Элементы корзины */
 .cart-item {
   display: grid;
   grid-template-columns: 1fr auto auto auto;
@@ -626,7 +626,7 @@ fieldset:has(#brick-scale-slider) {
   color: #b33900;
 }
 
-/* --- Формы оформления и обратной связи --- */
+/* Формы оформления и обратной связи */
 .checkout-form,
 .feedback-form {
   display: flex;
@@ -683,7 +683,7 @@ fieldset:has(#brick-scale-slider) {
   padding: 20px 0;
 }
 
-/* --- СЕКЦИЯ: НЕДАВНО ПРОСМОТРЕННЫЕ ТОВАРЫ --- */
+/* Секция: недавно просмотренные товары */
 .viewed-section {
   max-width: 1200px;
   margin: 36px auto;
@@ -1082,7 +1082,7 @@ fieldset:has(#brick-scale-slider) {
   color: var(--text-muted);
 }
 
-/* --- АНИМАЦИЯ FAB КОРЗИНЫ --- */
+/* Анимация FAB корзины */
 @keyframes cartFabBump {
   0% { transform: scale(1); }
   40% { transform: scale(1.22); }
@@ -1093,7 +1093,7 @@ fieldset:has(#brick-scale-slider) {
   animation: cartFabBump 0.35s ease;
 }
 
-/* --- ПОДВАЛ И КНОПКА АДМИНИСТРАТОРА --- */
+/* Подвал и кнопка администратора */
 .site-footer {
   background: #fff;
   border-top: 1px solid var(--border);
@@ -1142,7 +1142,7 @@ fieldset:has(#brick-scale-slider) {
   box-shadow: var(--shadow-md);
 }
 
-/* --- МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ АДМИНИСТРАТОРА --- */
+/* Модальное окно авторизации администратора */
 .modal__content--auth {
   max-width: 440px;
   width: calc(100% - 32px);
@@ -1253,7 +1253,7 @@ fieldset:has(#brick-scale-slider) {
   text-decoration: none;
 }
 
-/* --- МОДАЛЬНОЕ ОКНО АДМИНИСТРАТОРА --- */
+/* Модальное окно администратора */
 .modal__content--wide {
   max-width: 860px;
   width: calc(100% - 32px);
@@ -1565,7 +1565,7 @@ fieldset:has(#brick-scale-slider) {
   padding: 10px 0;
 }
 
-/* --- АДАПТИВНОСТЬ (МЕДИА-ЗАПРОСЫ) --- */
+/* Адаптивность (медиа-запросы) */
 @media (max-width: 768px) {
   .settings-row {
     grid-template-columns: 1fr;
@@ -1611,7 +1611,7 @@ fieldset:has(#brick-scale-slider) {
   }
 }
 
-/* ================= МОДУЛЬ: МОЗАИКА ================= */
+/* Модуль: мозаика */
 .btn-mosaic {
   background: linear-gradient(135deg, #0f2b48 0%, #1e426d 100%);
   color: #fff;
@@ -1976,5 +1976,808 @@ fieldset:has(#brick-scale-slider) {
   }
   .modal__content--mosaic {
     padding: 20px 16px;
+  }
+}
+
+   КАЛЬКУЛЯТОР КИРПИЧЕЙ (ЧЗСК)
+
+/* Кнопка «калькулятор» в панели действий */
+.btn-calc {
+  background: linear-gradient(135deg, #c0392b 0%, #d35400 100%);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 14px rgba(211, 84, 0, 0.35);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-calc:hover {
+  background: linear-gradient(135deg, #a93226 0%, #ba4a00 100%);
+  box-shadow: 0 6px 18px rgba(211, 84, 0, 0.45);
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+.btn-calc:active {
+  transform: translateY(0);
+}
+
+.calc-btn-icon {
+  flex-shrink: 0;
+}
+
+/* Модальное окно калькулятора */
+.modal__content--calc {
+  max-width: 1140px;
+  width: calc(100% - 32px);
+  max-height: 90vh;
+  padding: 28px 32px;
+  overflow-y: auto;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.calc-header {
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+}
+
+.calc-header h2 {
+  margin: 0 0 6px 0;
+  font-size: 1.45rem;
+  letter-spacing: -0.3px;
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+/* Двухколоночная раскладка калькулятора */
+.calc-body {
+  display: grid;
+  grid-template-columns: 1.15fr 0.95fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.calc-col-params {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.calc-section {
+  background: #fbfcfd;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.calc-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.calc-label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  margin-bottom: 10px;
+}
+
+.calc-sublabel {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+/* Быстрые пресеты строения */
+.calc-presets-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.calc-preset-btn {
+  font-size: 0.82rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid var(--border);
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-weight: 500;
+}
+
+.calc-preset-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* Табы выбора режима ввода */
+.calc-tabs-mode {
+  display: inline-flex;
+  background: #edf2f7;
+  padding: 3px;
+  border-radius: 8px;
+}
+
+.calc-tab-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.calc-tab-btn.active {
+  background: #fff;
+  color: var(--text-dark);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Сетка полей ввода */
+.calc-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+.calc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.calc-field label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.calc-field input[type="number"],
+.calc-field select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #fff;
+  color: var(--text-dark);
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.calc-field input[type="number"]:focus,
+.calc-field select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.12);
+}
+
+.calc-field-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  line-height: 1.25;
+}
+
+/* Чекбоксы */
+.calc-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+}
+
+.calc-checkbox-label input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.calc-subgroup {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
+.calc-subfields {
+  margin-top: 10px;
+}
+
+/* Окна и двери (вычет проемов) */
+.calc-openings-add-bar {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 0.8fr auto;
+  gap: 8px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.calc-openings-add-bar select,
+.calc-openings-add-bar input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.88rem;
+  background: #fff;
+}
+
+.calc-openings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calc-opening-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 0.85rem;
+}
+
+.calc-opening-icon {
+  margin-right: 8px;
+  font-size: 1rem;
+}
+
+.calc-opening-info {
+  flex: 1;
+  color: #334155;
+}
+
+.calc-opening-del-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.calc-opening-del-btn:hover {
+  color: #ef4444;
+}
+
+.calc-empty-hint {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 6px 0;
+}
+
+/* Способ кладки (выпадающее меню) */
+.calc-select-large {
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background-color: #fff;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+.calc-select-large:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.12);
+}
+
+
+/* Подстрока параметров */
+.calc-params-subrow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.calc-inline-radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.86rem;
+  color: #334155;
+}
+
+.calc-inline-radios label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.calc-inline-radios label.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.calc-inline-radios input[type="radio"] {
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* Управление мозаикой в калькуляторе */
+.calc-mosaic-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.calc-mosaic-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.calc-mosaic-presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.calc-preset-tag {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.calc-mosaic-preset-chip {
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #334155;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.calc-mosaic-preset-chip:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.calc-colors-sliders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.calc-color-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.calc-color-row.active {
+  background: #fff;
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.calc-color-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calc-color-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.calc-color-checkbox {
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.calc-color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.calc-color-name {
+  font-size: 0.88rem;
+  color: var(--text-dark);
+}
+
+.calc-color-price {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-left: 6px;
+  font-weight: normal;
+}
+
+.calc-pct-badge {
+  background: #0f172a;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.calc-slider-row {
+  display: flex;
+  align-items: center;
+  padding-left: 28px;
+}
+
+.calc-slider {
+  width: 100%;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.calc-alert-box {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.calc-alert-box.info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+/* Правая колонка (итоговая смета) */
+.calc-col-summary {
+  position: sticky;
+  top: 10px;
+}
+
+.calc-summary-card {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+}
+
+.calc-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.calc-summary-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.calc-badge-live {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #16a34a;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+/* Главный блок стоимости */
+.calc-hero-cost {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+}
+
+.calc-hero-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.calc-hero-value {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #b91c1c;
+  line-height: 1.15;
+  margin: 4px 0;
+}
+
+.calc-hero-sub {
+  font-size: 0.76rem;
+  color: #94a3b8;
+}
+
+/* Полоса пропорций */
+.calc-ratio-container {
+  margin-bottom: 16px;
+}
+
+.calc-ratio-bar {
+  display: flex;
+  height: 24px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+  background: #e2e8f0;
+}
+
+.calc-ratio-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  min-width: 2px;
+}
+
+/* Сетка параметров */
+.calc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.calc-stat-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.calc-stat-num {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.calc-stat-lbl {
+  font-size: 0.74rem;
+  color: #64748b;
+}
+
+/* Таблица сметы */
+.calc-table-wrap {
+  margin-bottom: 14px;
+  max-height: 220px;
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.calc-estimate-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.calc-estimate-table th {
+  background: #f1f5f9;
+  padding: 8px 10px;
+  font-weight: 600;
+  color: #475569;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 1px solid var(--border);
+}
+
+.calc-estimate-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.calc-tbl-color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calc-color-swatch-sm {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.calc-tbl-sub {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+.calc-note {
+  font-size: 0.74rem;
+  color: #64748b;
+  line-height: 1.35;
+  margin-bottom: 18px;
+}
+
+/* Кнопки действий */
+.calc-actions-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.calc-btn-add-cart {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 1rem;
+  font-weight: 700;
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+  transition: all 0.2s ease;
+}
+
+.calc-btn-add-cart:hover {
+  background: #15803d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.4);
+}
+
+.calc-secondary-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.calc-secondary-actions .btn {
+  padding: 9px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Всплывающее уведомление (Toast) */
+.calc-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #0f172a;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  z-index: 100000;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.calc-toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.calc-toast.warn {
+  background: #d97706;
+}
+
+/* Печать сметы (print friendly styles) */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #calcModal,
+  #calcModal * {
+    visibility: visible;
+  }
+  #calcModal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    display: block !important;
+  }
+  .modal__overlay,
+  .modal__close,
+  .calc-actions-panel,
+  .calc-presets-row,
+  .calc-tabs-mode,
+  .calc-openings-add-bar,
+  .calc-opening-del-btn,
+  .calc-mosaic-actions-bar,
+  .calc-mosaic-presets,
+  .calc-slider-row {
+    display: none !important;
+  }
+  .modal__content--calc {
+    max-width: 100%;
+    width: 100%;
+    max-height: none;
+    box-shadow: none;
+    padding: 0;
+  }
+  .calc-body {
+    grid-template-columns: 1fr;
+  }
+  .calc-hero-cost {
+    border: 2px solid #000;
   }
 }

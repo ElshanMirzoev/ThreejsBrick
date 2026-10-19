@@ -7,21 +7,21 @@ import {
 } from "./main.js";
 import { render2DWall } from "./view2d.js";
 
-// ================= ЦВЕТА СИЛИКАТНОГО КИРПИЧА ЧЗСК =================
+// Цвета силикатного кирпича ЧЗСК
 export const CHZSK_COLORS = [
-  { key: "gray",  name: "Серо-голубой",      hex: "#a8b0b8" },
-  { key: "gray2", name: "Тёмно-серый",       hex: "#8f9ba5" },
-  { key: "pink",  name: "Розово-персиковый", hex: "#e8a89a" },
-  { key: "peach", name: "Персиковый",        hex: "#f0b8a0" },
-  { key: "beige", name: "Бежево-кремовый",   hex: "#e8d4a8" },
-  { key: "cream", name: "Кремово-белый",     hex: "#f0e8d8" },
+  { key: "gray",  name: "Рядовой (пустотелый)", hex: "#a8b0b8" },
+  { key: "gray2", name: "Графит",          hex: "#8f9ba5" },
+  { key: "pink",  name: "Красный",         hex: "#e8a89a" },
+  { key: "peach", name: "Оранжевый",       hex: "#f0b8a0" },
+  { key: "beige", name: "Желтый",          hex: "#e8d4a8" },
+  { key: "cream", name: "Разнотон",        hex: "#f0e8d8" },
 ];
 
 export const COLOR_MAP = new Map(CHZSK_COLORS.map((c) => [c.key, c]));
 
 const STORAGE_KEY = "threejsbrick_mosaic_config";
 
-// ================= СОСТОЯНИЕ МОДУЛЯ =================
+// Состояние модуля
 // Мозаика применяется ко всем кирпичным стенам единообразно
 const mosaicConfig = {
   mix: { gray2: 45, gray: 35, peach: 20 },
@@ -58,7 +58,7 @@ function saveState() {
   }
 }
 
-// ================= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =================
+// Вспомогательные функции
 /**
  * Нормализация пропорций выбранных цветов до строго 100%
  */
@@ -153,7 +153,7 @@ function mixToMosaicColors(mix) {
   }));
 }
 
-// ================= DOM ЭЛЕМЕНТЫ =================
+// DOM элементы
 let modalEl = null;
 let openBtn = null;
 let colorsListWrap = null;
@@ -163,7 +163,7 @@ let applyBtn = null;
 let resetBtn = null;
 let statusHint = null;
 
-// ================= ОТРИСОВКА ИНТЕРФЕЙСА =================
+// Отрисовка интерфейса
 function renderColorsUI() {
   if (!colorsListWrap) return;
   const mix = mosaicConfig.mix || {};
@@ -276,7 +276,7 @@ function renderColorsUI() {
   });
 }
 
-// ================= ОТРИСОВКА ПРЕВЬЮ В МОДАЛКЕ =================
+// Отрисовка превью в модалке
 function drawPreview() {
   if (!previewCanvas) return;
   const ctx = previewCanvas.getContext("2d");
@@ -316,7 +316,7 @@ function drawPreview() {
   }
 }
 
-// ================= ПРИМЕНЕНИЕ И СБРОС =================
+// Применение и сброс
 function handleApply() {
   if (statusHint) {
     statusHint.textContent = "Применение...";
@@ -352,7 +352,7 @@ function handleApply() {
 }
 
 function handleResetMonochrome() {
-  // Сброс кирпича в обычный серо-голубой
+  // Сброс кирпича в обычный рядовой (пустотелый)
   mosaicConfig.mix = { gray: 100 };
   mosaicConfig.isMonochrome = true;
 
@@ -376,7 +376,7 @@ function handleResetMonochrome() {
   saveState();
 }
 
-// ================= ОТКРЫТИЕ И ЗАКРЫТИЕ МОДАЛКИ =================
+// Открытие и закрытие модалки
 export function openMosaicModal() {
   const currentSize = document.querySelector('input[name="size"]:checked')?.value;
   if (currentSize === "250x120x65") {
@@ -403,7 +403,7 @@ export function closeMosaicModal() {
   document.body.classList.remove("modal-open");
 }
 
-// ================= ИНИЦИАЛИЗАЦИЯ МОДУЛЯ =================
+// Инициализация модуля
 export function initMosaicModule() {
   openBtn = document.getElementById("mosaicBtn");
   modalEl = document.getElementById("mosaicModal");
@@ -448,3 +448,27 @@ if (document.readyState === "loading") {
 } else {
   initMosaicModule();
 }
+
+// Экспорт для калькулятора и внешних модулей
+export function getMosaicConfig() {
+  loadSavedState();
+  return {
+    mix: { ...(mosaicConfig.mix || {}) },
+    isMonochrome: Boolean(mosaicConfig.isMonochrome),
+  };
+}
+
+export function setMosaicConfig(mix, isMonochrome = false) {
+  mosaicConfig.mix = { ...mix };
+  mosaicConfig.isMonochrome = isMonochrome;
+  saveState();
+  renderColorsUI();
+  drawPreview();
+}
+
+export {
+  mixToMosaicColors,
+  normalizeMix,
+  adjustMixBySlider,
+  STORAGE_KEY,
+};

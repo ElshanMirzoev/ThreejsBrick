@@ -4,7 +4,7 @@
 const FEEDBACK_KEY = "feedback_messages_v1";
 const CALLBACK_KEY = "callback_requests_v1";
 
-// ---------- Утилиты ----------
+// Утилиты
 function openModal(el) { if (el) el.hidden = false; }
 function closeModal(el) { if (el) el.hidden = true; }
 
@@ -32,7 +32,7 @@ function clearStatus(form) {
   if (box) { box.textContent = ""; box.className = "form-status"; }
 }
 
-// ---------- Маска телефона ----------
+// Маска телефона
 function attachPhoneMask(input) {
   if (!input) return;
   input.addEventListener("input", (e) => {
@@ -40,7 +40,7 @@ function attachPhoneMask(input) {
   });
 }
 
-// ---------- Обратная связь ----------
+// Обратная связь
 function initFeedback() {
   const btn = document.getElementById("feedbackBtn");
   const modal = document.getElementById("feedbackModal");
@@ -89,7 +89,7 @@ function initFeedback() {
   });
 }
 
-// ---------- Заказ звонка ----------
+// Заказ звонка
 function initCallback() {
   const btn = document.getElementById("callbackBtn");
   const modal = document.getElementById("callbackModal");
@@ -141,7 +141,7 @@ function initCallback() {
   });
 }
 
-// ---------- Инициализация ----------
+// Инициализация
 function init() {
   initFeedback();
   initCallback();

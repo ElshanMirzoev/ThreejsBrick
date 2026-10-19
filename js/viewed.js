@@ -2,26 +2,23 @@
 // Модуль «Недавно просмотренные товары» и панель администратора (Аналитика)
 
 import { addItem } from "./cart.js";
+import { getProductData, getBrickPrice, onPricesUpdated } from "./prices.js";
 
-// ================================================================
-// НАСТРОЙКИ И КЛЮЧИ ХРАНИЛИЩА
-// ================================================================
+// Настройки и ключи хранилища
 const STORAGE_VIEWED_KEY = "viewed_items_v1";
 const STORAGE_LOG_KEY    = "admin_views_log_v1";
 const STORAGE_INIT_KEY   = "viewed_initialized_v1";
 const MAX_VIEWED_ITEMS   = 12;
-const BRICK_PRICE        = 22.70;
+const BRICK_PRICE        = getBrickPrice("250x120x88", "gray");
 
-// ================================================================
-// СЛОВАРИ И МАППИНГ
-// ================================================================
+// Словари и маппинг
 const COLOR_NAMES = {
-  gray:  "Серо-голубой",
-  gray2: "Тёмно-серый",
-  pink:  "Розово-персиковый",
-  peach: "Персиковый",
-  beige: "Бежево-кремовый",
-  cream: "Кремово-белый",
+  gray:  "Рядовой (пустотелый)",
+  gray2: "Графит",
+  pink:  "Красный",
+  peach: "Оранжевый",
+  beige: "Желтый",
+  cream: "Разнотон",
 };
 
 const COLOR_HEX = {
@@ -76,99 +73,30 @@ const MODEL_NAMES = {
   five_story_building: "Пятиэтажный дом",
 };
 
-// ================================================================
-// ОФИЦИАЛЬНЫЙ КАТАЛОГ ПРОДУКЦИИ ЧЗСК (silicatbrick.ru)
-// ================================================================
+// Официальный каталог продукции ЧЗСК (silicatbrick.ru)
 export const CHZSK_CATALOG_URL = "https://silicatbrick.ru/silikatnyy-kirpich/";
 
-export const CHZSK_PRODUCTS = {
-  // 1. Одинарный полнотелый: ЕДИНСТВЕННЫЙ силикатный кирпич 250×120×65 производства ЧЗСК
-  "250x120x65": {
-    gray: {
-      name: "Кирпич силикатный полнотелый одинарный рядовой 200/50",
-      shortTitle: "Полнотелый одинарный рядовой (250×120×65)",
-      url: "https://silicatbrick.ru/silikatnyy-kirpich/kirpich-polnotelyy/kirpich-silikatnyy-polnotelyy-odinarnyy-ryadovoy-200-50/",
-      imageUrl: "images/products/odinarnyy_gray.jpg",
-      price: 21.70,
-      articul: "ЧЗСК-ОДИН-200",
-      description: "ГОСТ 379-2015, марка М200/F50. Единственный кирпич формата 250х120х65 в номенклатуре ЧЗСК.",
-      isOnlySizeColor: true,
-    },
-  },
-  // 2. Утолщенный (полуторный) кирпич 250×120×88
-  "250x120x88": {
-    gray: {
-      name: "Кирпич силикатный полнотелый утолщенный рядовой 200/50",
-      shortTitle: "Полнотелый утолщенный рядовой (250×120×88)",
-      url: "https://silicatbrick.ru/silikatnyy-kirpich/kirpich-polnotelyy/kirpich-silikatnyy-polnotelyy-utolschennyy-ryadovoy-200-50/",
-      imageUrl: "images/products/utolschennyy_gray.jpg",
-      price: 22.70,
-      articul: "ЧЗСК-УТОЛ-200",
-      description: "ГОСТ 379-2015, марка М200, морозостойкость F50.",
-    },
-    gray2: {
-      name: "Кирпич силикатный утолщенный объемного окрашивания «Графит» 150/50",
-      shortTitle: "Объемно-окрашенный «Графит» (250×120×88)",
-      url: "https://silicatbrick.ru/silikatnyy-kirpich/kirpich-obemnogo-okrashivaniya/kirpich-silikatnyy-utolschennyy-obemnogo-okrashivaniya-oranzhevyy-150-50-clone/",
-      imageUrl: "images/products/utolschennyy_gray2.jpg",
-      price: 35.50,
-      articul: "ЧЗСК-ГРАФ-150",
-      description: "ГОСТ 379-2015, марка М150/F50. Графитовый цвет объемного окрашивания.",
-    },
-    peach: {
-      name: "Кирпич силикатный утолщенный объемного окрашивания «Оранжевый» 150/50",
-      shortTitle: "Объемно-окрашенный «Оранжевый» (250×120×88)",
-      url: "https://silicatbrick.ru/silikatnyy-kirpich/kirpich-obemnogo-okrashivaniya/kirpich-silikatnyy-utolschennyy-obemnogo-okrashivaniya-oranzhevyy-150-50/",
-      imageUrl: "images/products/utolschennyy_peach.jpg",
-      price: 35.50,
-      articul: "ЧЗСК-ОРАНЖ-150",
-      description: "ГОСТ 379-2015, марка М150/F50. Стойкий оранжево-персиковый пигмент.",
-    },
-    pink: {
-      name: "Кирпич силикатный утолщенный объемного окрашивания «Красный» 150/50",
-      shortTitle: "Объемно-окрашенный «Красный» (250×120×88)",
-      url: "https://silicatbrick.ru/silikatnyy-kirpich/kirpich-obemnogo-okrashivaniya/kirpich-silikatnyy-utolschennyy-obemnogo-okrashivaniya-krasnyy-150-50/",
-      imageUrl: "images/products/utolschennyy_pink.jpg",
-      price: 35.50,
-      articul: "ЧЗСК-КРАСН-150",
-      description: "ГОСТ 379-2015, марка М150/F50. Насыщенный красный цвет объемного окрашивания.",
-    },
-    beige: {
-      name: "Кирпич силикатный утолщенный объемного окрашивания «Желтый» 150/50",
-      shortTitle: "Объемно-окрашенный «Желтый» (250×120×88)",
-      url: "https://silicatbrick.ru/silikatnyy-kirpich/kirpich-obemnogo-okrashivaniya/kirpich-silikatnyy-utolschennyy-obemnogo-okrashivaniya-grafit-150-50-clone/",
-      imageUrl: "images/products/utolschennyy_beige.jpg",
-      price: 35.50,
-      articul: "ЧЗСК-ЖЕЛТ-150",
-      description: "ГОСТ 379-2015, марка М150/F50. Теплый желто-бежевый оттенок.",
-    },
-    cream: {
-      name: "Кирпич силикатный утолщенный с технологическими пустотами рядовой марки 150",
-      shortTitle: "Пустотелый утолщенный рядовой (250×120×88)",
-      url: "https://silicatbrick.ru/silikatnyy-kirpich/kirpich-s-pustotami/kirpich-silikatnyy-utolschennyy-s-tehnologicheskimi-pustotami-ryadovoy-marki-150/",
-      imageUrl: "images/products/utolschennyy_cream.jpg",
-      price: 21.30,
-      articul: "ЧЗСК-ПУСТ-150",
-      description: "ГОСТ 379-2015, марка М150/F50. Облегченный силикатный кирпич с пустотами.",
-    },
-  },
-};
+/**
+ * Динамический прокси к актуальным данным продукции ЧЗСК
+ */
+export const CHZSK_PRODUCTS = new Proxy({}, {
+  get(_, size) {
+    return new Proxy({}, {
+      get(_, color) {
+        return getProductData(size, color);
+      }
+    });
+  }
+});
 
 /**
- * Получить данные официального товара по размеру и цвету.
- * Для формата 250×120×65 гарантированно возвращается единственный кирпич:
- * «Кирпич силикатный полнотелый одинарный рядовой 200/50»
+ * Получить данные официального товара по размеру и цвету с живыми ценами
  */
 export function getProductForConfig(size, color) {
-  if (size === "250x120x65") {
-    return CHZSK_PRODUCTS["250x120x65"].gray;
-  }
-  return CHZSK_PRODUCTS["250x120x88"]?.[color] || CHZSK_PRODUCTS["250x120x88"].gray;
+  return getProductData(size, color);
 }
 
-// ================================================================
-// АВТОРИЗАЦИЯ И РАЗГРАНИЧЕНИЕ ПРАВ АДМИНИСТРАТОРА
-// ================================================================
+// Авторизация и разграничение прав администратора
 const ADMIN_STORAGE_AUTH_KEY = "threejsbrick_admin_auth_v1";
 const DEFAULT_ADMIN_PIN = "chzsk2026";
 
@@ -277,9 +205,7 @@ export function logoutAdmin() {
   alert("Сессия администратора завершена.");
 }
 
-// ================================================================
-// ХРАНИЛИЩЕ LOCALSTORAGE
-// ================================================================
+// Хранилище localstorage
 function loadViewedItems() {
   try {
     const data = JSON.parse(localStorage.getItem(STORAGE_VIEWED_KEY));
@@ -327,9 +253,7 @@ function saveAdminLog(log) {
   }
 }
 
-// ================================================================
-// ВИТРИНА ПРОДУКЦИИ ЧЗСК ПО УМОЛЧАНИЮ (silicatbrick.ru)
-// ================================================================
+// Витрина продукции ЧЗСК по умолчанию (silicatbrick.ru)
 function getCatalogShowcaseItems() {
   const now = Date.now();
   const p1 = getProductForConfig("250x120x65", "gray");
@@ -458,9 +382,7 @@ function seedInitialDataIfNeeded() {
   }
 }
 
-// ================================================================
-// ТЕКУЩАЯ КОНФИГУРАЦИЯ ИЗ ФОРМЫ
-// ================================================================
+// Текущая конфигурация из формы
 function getCurrentBrickConfig() {
   const size = document.querySelector('input[name="size"]:checked')?.value;
   const layout = document.querySelector('input[name="layout"]:checked')?.value;
@@ -500,9 +422,7 @@ function getCurrentBrickConfig() {
   };
 }
 
-// ================================================================
-// ОТСЛЕЖИВАНИЕ ПРОСМОТРОВ
-// ================================================================
+// Отслеживание просмотров
 let lastTrackedInfo = null;
 
 function isDuplicateTrack(cfg) {
@@ -551,11 +471,20 @@ function trackView(source = "Панель конфигуратора") {
   }
   saveAdminLog(adminLog);
 
-  // Если открыто окно администратора, сразу обновляем статистику
-  const adminModal = document.getElementById("adminModal");
-  if (adminModal && !adminModal.hidden) {
-    renderAdminModal();
-  }
+  // 3. Отправка на сервер завода (для объединения статистики со всех клиентов)
+  try {
+    fetch("api/log.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        color_brick: cfg.color_brick,
+        size: cfg.size,
+        layout: cfg.layout,
+        color_rastvor: cfg.color_rastvor,
+        trigger: source,
+      }),
+    }).catch(() => {});
+  } catch {}
 }
 
 let debounceTimer = null;
@@ -566,9 +495,7 @@ function scheduleDebouncedTrack(source = "Панель конфигуратор�
   }, 350);
 }
 
-// ================================================================
-// ФОРМАТИРОВАНИЕ ДЛЯ ОТОБРАЖЕНИЯ
-// ================================================================
+// Форматирование для отображения
 function formatDateTime(isoStr) {
   if (!isoStr) return "—";
   const d = new Date(isoStr);
@@ -593,9 +520,7 @@ function formatPrice(n) {
   );
 }
 
-// ================================================================
-// РЕНДЕР СЕКЦИИ «НЕДАВНО ПРОСМОТРЕННЫЕ»
-// ================================================================
+// Рендер секции «недавно просмотренные»
 function renderViewedSection() {
   const listEl = document.getElementById("viewedItemsList");
   const countEl = document.getElementById("viewedCount");
@@ -692,9 +617,7 @@ function renderViewedSection() {
     .join("");
 }
 
-// ================================================================
-// ДЕЙСТВИЯ НАД КАРТОЧКАМИ ПРОСМОТРЕННЫХ
-// ================================================================
+// Действия над карточками просмотренных
 function restoreAndVisualize(item) {
   if (!item) return;
 
@@ -750,12 +673,14 @@ function restoreAndVisualize(item) {
 
 function handleAddToCartFromCard(itemOrColor, btnEl) {
   let color = "gray";
+  let size = "250x120x88";
   let price = null;
   let title = null;
   let imageUrl = null;
 
   if (typeof itemOrColor === "object" && itemOrColor !== null) {
     color = itemOrColor.color_brick || "gray";
+    size = itemOrColor.size || "250x120x88";
     price = itemOrColor.price;
     title = itemOrColor.title;
     imageUrl = itemOrColor.imageUrl;
@@ -765,9 +690,9 @@ function handleAddToCartFromCard(itemOrColor, btnEl) {
 
   // Вызов метода корзины из js/cart.js
   if (typeof addItem === "function") {
-    addItem(color, 1, price, title, imageUrl);
+    addItem(color, 1, price, title, imageUrl, size);
   } else if (window.cartModule && typeof window.cartModule.addItem === "function") {
-    window.cartModule.addItem(color, 1, price, title, imageUrl);
+    window.cartModule.addItem(color, 1, price, title, imageUrl, size);
   }
 
   // Анимация плавающей кнопки корзины
@@ -792,9 +717,7 @@ function handleAddToCartFromCard(itemOrColor, btnEl) {
   }
 }
 
-// ================================================================
-// ПАНЕЛЬ АДМИНИСТРАТОРА (АНАЛИТИКА)
-// ================================================================
+// Панель администратора (аналитика)
 function openAdminModal() {
   const modal = document.getElementById("adminModal");
   if (!modal) return;
@@ -1045,9 +968,7 @@ function clearViewedHistory() {
   renderViewedSection();
 }
 
-// ================================================================
-// ИНИЦИАЛИЗАЦИЯ И СОБЫТИЯ
-// ================================================================
+// Инициализация и события
 function initViewedModule() {
   seedInitialDataIfNeeded();
   renderViewedSection();
@@ -1146,67 +1067,9 @@ function initViewedModule() {
     }
   });
 
-  // 6. Панель администратора (кнопка в шапке и кнопка в подвале)
-  const handleOpenAdmin = () => {
-    if (isUserAdmin()) {
-      openAdminModal();
-    } else {
-      openAdminAuthModal();
-    }
-  };
-
-  const adminHeaderBtn = document.getElementById("adminHeaderBtn");
-  if (adminHeaderBtn) {
-    adminHeaderBtn.addEventListener("click", handleOpenAdmin);
-  }
-
-  const adminBtn = document.getElementById("adminPanelBtn");
-  if (adminBtn) {
-    adminBtn.addEventListener("click", handleOpenAdmin);
-  }
-
-  // Закрытие модального окна авторизации администратора
-  document.querySelectorAll("[data-close-admin-auth]").forEach((el) => {
-    el.addEventListener("click", closeAdminAuthModal);
-  });
-
-  // Отправка формы авторизации
-  const adminAuthForm = document.getElementById("adminAuthForm");
-  if (adminAuthForm) {
-    adminAuthForm.addEventListener("submit", handleAdminAuthSubmit);
-  }
-
-  const logoutBtn = document.getElementById("adminLogoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", logoutAdmin);
-  }
-
-  document.querySelectorAll("[data-close-admin]").forEach((el) => {
-    el.addEventListener("click", closeAdminModal);
-  });
-
-  const exportBtn = document.getElementById("adminExportCsvBtn");
-  if (exportBtn) {
-    exportBtn.addEventListener("click", exportAdminLogToCsv);
-  }
-
-  const resetBtn = document.getElementById("adminResetBtn");
-  if (resetBtn) {
-    resetBtn.addEventListener("click", resetAdminLog);
-  }
-
-  // Закрытие модальных окон по Escape
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      const authModal = document.getElementById("adminAuthModal");
-      if (authModal && !authModal.hidden) {
-        closeAdminAuthModal();
-      }
-      const adminModal = document.getElementById("adminModal");
-      if (adminModal && !adminModal.hidden) {
-        closeAdminModal();
-      }
-    }
+  // Перерисовка карточек секции «Недавно просмотренные» при обновлении цен с сайта
+  onPricesUpdated(() => {
+    renderViewedSection();
   });
 }
 

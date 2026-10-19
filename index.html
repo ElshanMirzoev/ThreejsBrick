@@ -60,7 +60,7 @@
 
       <!-- Панель выбора параметров -->
       <nav class="panel" id="config-panel" aria-label="Конфигуратор">
-        <!-- ОБЪЕКТ -->
+        <!-- Объект -->
         <fieldset class="object-fieldset">
           <legend>Объект</legend>
           <div class="row">
@@ -95,12 +95,12 @@
           <fieldset>
             <legend>Цвет кирпича</legend>
             <div class="options" id="color-brick-options">
-              <label title="Серо-голубой"><input type="radio" name="color_brick" value="gray" checked /></label>
-              <label title="Тёмно-серый"><input type="radio" name="color_brick" value="gray2" /></label>
-              <label title="Розово-персиковый"><input type="radio" name="color_brick" value="pink" /></label>
-              <label title="Персиковый"><input type="radio" name="color_brick" value="peach" /></label>
-              <label title="Бежево-кремовый"><input type="radio" name="color_brick" value="beige" /></label>
-              <label title="Кремово-белый"><input type="radio" name="color_brick" value="cream" /></label>
+              <label title="Рядовой (пустотелый)"><input type="radio" name="color_brick" value="gray" checked /></label>
+              <label title="Графит"><input type="radio" name="color_brick" value="gray2" /></label>
+              <label title="Красный"><input type="radio" name="color_brick" value="pink" /></label>
+              <label title="Оранжевый"><input type="radio" name="color_brick" value="peach" /></label>
+              <label title="Желтый"><input type="radio" name="color_brick" value="beige" /></label>
+              <label title="Разнотон"><input type="radio" name="color_brick" value="cream" /></label>
             </div>
           </fieldset>
 
@@ -126,6 +126,19 @@
 
       <!-- Кнопки -->
       <div class="actions-row">
+        <button id="calcBtn" class="btn btn-calc" type="button" title="Калькулятор расхода кирпича и сметы">
+          <svg class="calc-btn-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: -3px; margin-right: 6px;">
+            <rect x="2" y="2" width="16" height="16" rx="3.5" stroke="currentColor" stroke-width="1.8"/>
+            <rect x="5" y="4.5" width="10" height="3" rx="0.8" fill="currentColor"/>
+            <circle cx="6" cy="10.8" r="1.1" fill="currentColor"/>
+            <circle cx="10" cy="10.8" r="1.1" fill="currentColor"/>
+            <circle cx="14" cy="10.8" r="1.1" fill="currentColor"/>
+            <circle cx="6" cy="14.8" r="1.1" fill="currentColor"/>
+            <circle cx="10" cy="14.8" r="1.1" fill="currentColor"/>
+            <rect x="12.8" y="13.8" width="2.4" height="2" rx="0.5" fill="currentColor"/>
+          </svg>
+          КАЛЬКУЛЯТОР
+        </button>
         <button id="mosaicBtn" class="btn btn-mosaic" type="button" title="Конструктор кладки">
           <svg class="mosaic-btn-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: -3px; margin-right: 6px;">
             <rect x="1" y="2" width="8" height="4.5" rx="1" fill="#ffffff" fill-opacity="0.95" />
@@ -162,7 +175,7 @@
       </div>
     </main>
 
-    <!-- ================= НЕДАВНО ПРОСМОТРЕННЫЕ ================= -->
+    <!-- Недавно просмотренные -->
     <section class="panel viewed-section" id="viewedSection" aria-label="Недавно просмотренные товары">
       <div class="viewed-header">
         <div class="viewed-title-group">
@@ -184,7 +197,7 @@
       </div>
     </section>
 
-    <!-- ================= КОРЗИНА ================= -->
+    <!-- Корзина -->
     <button id="cartBtn" class="cart-fab" aria-label="Корзина">
       🛒 <span id="cartCount" class="cart-fab__count">0</span>
     </button>
@@ -196,12 +209,12 @@
           <label>
             Цвет кирпича
             <select id="cartColor">
-              <option value="gray">Серо-голубой</option>
-              <option value="gray2">Тёмно-серый</option>
-              <option value="pink">Розово-персиковый</option>
-              <option value="peach">Персиковый</option>
-              <option value="beige">Бежево-кремовый</option>
-              <option value="cream">Кремово-белый</option>
+              <option value="gray">Рядовой (пустотелый)</option>
+              <option value="gray2">Графит</option>
+              <option value="pink">Красный</option>
+              <option value="peach">Оранжевый</option>
+              <option value="beige">Желтый</option>
+              <option value="cream">Разнотон</option>
             </select>
           </label>
           <label>
@@ -209,7 +222,7 @@
             <input id="cartQty" type="number" min="1" value="1" />
           </label>
           <div class="cart-panel__total">
-            Итого: <span id="cartPanelTotal">22,70 ₽</span>
+            Итого: <span id="cartPanelTotal">22,60 ₽</span>
           </div>
           <button id="addToCartBtn" class="btn" type="button">В корзину</button>
         </div>
@@ -307,7 +320,7 @@
       </div>
     </div>
 
-    <!-- ================= ОБРАТНАЯ СВЯЗЬ И ЗВОНОК ================= -->
+    <!-- Обратная связь и звонок -->
     <div class="feedback-buttons">
       <button id="feedbackBtn" class="btn btn--outline" type="button">
         ✉ Обратная связь
@@ -417,134 +430,16 @@
       </div>
     </div>
 
-    <!-- ================= ПОДВАЛ И АДМИН-ПАНЕЛЬ ================= -->
+    <!-- Подвал -->
     <footer class="site-footer">
       <div class="site-footer__inner">
         <div class="site-footer__copy">
           © Череповецкий завод силикатного кирпича
         </div>
-        <div class="site-footer__actions">
-          <button id="adminPanelBtn" class="btn btn-admin" type="button">
-            Панель администратора
-          </button>
-        </div>
       </div>
     </footer>
 
-    <!-- Модалка: Авторизация администратора -->
-    <div id="adminAuthModal" class="modal admin-auth-modal" hidden>
-      <div class="modal__overlay" data-close-admin-auth></div>
-      <div class="modal__content modal__content--auth">
-        <button class="modal__close" data-close-admin-auth title="Закрыть">×</button>
-        <div class="admin-auth-header">
-          <div class="admin-auth-icon">⚙</div>
-          <h2>Вход в панель администратора</h2>
-          <p class="modal__hint">Аналитика просмотров и предпочтений покупателей ЧЗСК</p>
-        </div>
-        <form id="adminAuthForm" class="admin-auth-form" novalidate>
-          <label for="adminPinInput">Пароль доступа:</label>
-          <input type="password" id="adminPinInput" class="admin-pin-input" placeholder="Введите пароль (по умолчанию: chzsk2026)" autocomplete="current-password" required />
-          <div id="adminAuthError" class="admin-auth-error" hidden>Неверный пароль. Попробуйте еще раз.</div>
-          <div class="admin-auth-actions">
-            <button type="submit" class="btn btn-primary admin-auth-submit">Войти</button>
-            <button type="button" class="btn btn--outline" data-close-admin-auth>Отмена</button>
-          </div>
-          <div class="admin-auth-footer-hint">
-            💡 <strong>Код доступа для тестирования:</strong> <code>chzsk2026</code><br />
-            В релизе на сайте <a href="https://silicatbrick.ru" target="_blank" rel="noopener noreferrer">silicatbrick.ru</a> панель автоматически открывается для авторизованных администраторов интернет-магазина.
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Модалка: Панель администратора -->
-    <div id="adminModal" class="modal admin-modal" hidden>
-      <div class="modal__overlay" data-close-admin></div>
-      <div class="modal__content modal__content--wide">
-        <button class="modal__close" data-close-admin title="Закрыть окно">×</button>
-
-        <div class="admin-header">
-          <div class="admin-header__title-wrap">
-            <h2>Панель администратора</h2>
-            <p class="modal__hint">Аналитика интереса клиентов и статистика просмотров кирпичной кладки</p>
-          </div>
-          <div class="admin-toolbar">
-            <button id="adminExportCsvBtn" class="btn btn--outline admin-btn--export" type="button" title="Скачать аналитику для Excel">
-              📥 Экспорт в CSV
-            </button>
-            <button id="adminResetBtn" class="btn btn--outline admin-btn--reset" type="button" title="Очистить всю аналитику">
-              🗑 Сбросить статистику
-            </button>
-            <button id="adminLogoutBtn" class="btn btn--outline admin-btn--logout" type="button" title="Выйти из режима администратора">
-              🔒 Выйти
-            </button>
-          </div>
-        </div>
-
-        <!-- Сводка (KPI карточки) -->
-        <div class="admin-kpi-grid">
-          <div class="admin-kpi-card">
-            <span class="admin-kpi-card__label">Всего просмотров</span>
-            <span class="admin-kpi-card__value" id="adminKpiTotal">0</span>
-          </div>
-          <div class="admin-kpi-card">
-            <span class="admin-kpi-card__label">Уникальных конфигураций</span>
-            <span class="admin-kpi-card__value" id="adminKpiUnique">0</span>
-          </div>
-          <div class="admin-kpi-card">
-            <span class="admin-kpi-card__label">Первый просмотр</span>
-            <span class="admin-kpi-card__value admin-kpi-card__value--sm" id="adminKpiFirst">—</span>
-          </div>
-          <div class="admin-kpi-card">
-            <span class="admin-kpi-card__label">Последний просмотр</span>
-            <span class="admin-kpi-card__value admin-kpi-card__value--sm" id="adminKpiLast">—</span>
-          </div>
-        </div>
-
-        <!-- Аналитика по цветам кирпича -->
-        <div class="admin-section">
-          <h3 class="admin-section__title">Популярность цветов кирпича</h3>
-          <div id="adminColorsAnalytics" class="admin-bars-list"></div>
-        </div>
-
-        <!-- Аналитика по размерам и видам кладки -->
-        <div class="admin-grid-2col">
-          <div class="admin-section">
-            <h3 class="admin-section__title">Популярность размеров</h3>
-            <div id="adminSizesAnalytics" class="admin-bars-list"></div>
-          </div>
-          <div class="admin-section">
-            <h3 class="admin-section__title">Популярность видов кладки</h3>
-            <div id="adminLayoutsAnalytics" class="admin-bars-list"></div>
-          </div>
-        </div>
-
-        <!-- Таблица последних 50 просмотров -->
-        <div class="admin-section">
-          <h3 class="admin-section__title">Журнал последних 50 просмотров</h3>
-          <div class="admin-table-wrap">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th style="width: 44px;">№</th>
-                  <th style="width: 155px;">Дата и время</th>
-                  <th>Цвет кирпича</th>
-                  <th>Размер</th>
-                  <th>Вид кладки</th>
-                  <th>Раствор</th>
-                </tr>
-              </thead>
-              <tbody id="adminLogTableBody">
-                <tr><td colspan="6" class="admin-table-empty">Загрузка данных...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ================= МОЗАИКА ================= -->
+    <!-- Мозаика -->
     <div id="mosaicModal" class="modal mosaic-modal" hidden>
       <div class="modal__overlay" data-close-mosaic></div>
       <div class="modal__content modal__content--mosaic">
@@ -595,11 +490,234 @@
       </div>
     </div>
 
-    <!-- ================= СКРИПТЫ ================= -->
+    <!-- Калькулятор кирпичей -->
+    <div id="calcModal" class="modal calc-modal" hidden>
+      <div class="modal__overlay" data-close-calc></div>
+      <div class="modal__content modal__content--calc">
+        <button class="modal__close" data-close-calc title="Закрыть окно">×</button>
+
+        <div class="calc-header">
+          <div class="calc-header__title-wrap">
+            <h2>🧮 Калькулятор расхода кирпича</h2>
+            <p class="modal__hint">
+              Ориентировочный расчет необходимого количества силикатного кирпича и примерной стоимости заказа
+            </p>
+          </div>
+        </div>
+
+        <div class="calc-body">
+          <!-- Левая колонка: Параметры ввода -->
+          <div class="calc-col-params">
+            <!-- 1. Быстрые пресеты -->
+            <div class="calc-section">
+              <label class="calc-label">Типовые строения:</label>
+              <div class="calc-presets-row">
+                <button type="button" class="btn btn-sm btn--outline calc-preset-btn" data-preset="cottage">🏡 Коттедж 10×10 м (2 эт.)</button>
+                <button type="button" class="btn btn-sm btn--outline calc-preset-btn" data-preset="house8x10">🏠 Дом 10×8 м (1 эт.)</button>
+                <button type="button" class="btn btn-sm btn--outline calc-preset-btn" data-preset="dacha6x6">🛖 Дача 6×6 м</button>
+              </div>
+            </div>
+
+            <!-- 2. Параметры строения (строго изолированные режимы ввода) -->
+            <div class="calc-section">
+              <div class="calc-section-header">
+                <label class="calc-label">1. Размеры строения</label>
+                <div class="calc-tabs-mode">
+                  <button type="button" class="calc-tab-btn active" data-mode="perimeter">По периметру</button>
+                  <button type="button" class="calc-tab-btn" data-mode="dimensions">Длина × Ширина</button>
+                  <button type="button" class="calc-tab-btn" data-mode="area">Площадь (м²)</button>
+                </div>
+              </div>
+
+              <!-- Режим 1: По периметру -->
+              <div class="calc-fields-grid" id="calcPerimeterGroup">
+                <div class="calc-field">
+                  <label for="calcPerimeter">Периметр стен (м)</label>
+                  <input type="number" id="calcPerimeter" min="1" max="1000" step="0.5" value="40" />
+                  <span class="calc-field-hint">Сумма длин всех стен строения</span>
+                </div>
+                <div class="calc-field">
+                  <label for="calcHeight">Высота стен (м)</label>
+                  <input type="number" id="calcHeight" min="1" max="50" step="0.1" value="3" />
+                  <span class="calc-field-hint">Обычно 2.8 – 3.0 м на этаж</span>
+                </div>
+                <div class="calc-field">
+                  <label for="calcFloors">Этажей</label>
+                  <input type="number" id="calcFloors" min="1" max="20" step="1" value="1" />
+                </div>
+              </div>
+
+              <!-- Режим 2: Длина и ширина -->
+              <div class="calc-fields-grid" id="calcDimensionsGroup" style="display: none;">
+                <div class="calc-field">
+                  <label for="calcLength">Длина дома (м)</label>
+                  <input type="number" id="calcLength" min="1" max="500" step="0.5" value="10" />
+                </div>
+                <div class="calc-field">
+                  <label for="calcWidth">Ширина дома (м)</label>
+                  <input type="number" id="calcWidth" min="1" max="500" step="0.5" value="10" />
+                </div>
+                <div class="calc-field">
+                  <label for="calcDimHeight">Высота стен (м)</label>
+                  <input type="number" id="calcDimHeight" min="1" max="50" step="0.1" value="3" />
+                </div>
+                <div class="calc-field">
+                  <label for="calcDimFloors">Этажей</label>
+                  <input type="number" id="calcDimFloors" min="1" max="20" step="1" value="1" />
+                </div>
+              </div>
+
+              <!-- Режим 3: Прямая площадь стен -->
+              <div class="calc-fields-grid" id="calcAreaGroup" style="display: none;">
+                <div class="calc-field" style="grid-column: 1 / -1;">
+                  <label for="calcDirectArea">Общая площадь стен (м²)</label>
+                  <input type="number" id="calcDirectArea" min="1" max="10000" step="1" value="120" />
+                  <span class="calc-field-hint">Если площадь стен уже известна по проекту</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Способ кладки и параметры материала -->
+            <div class="calc-section">
+              <label class="calc-label" for="calcMasonrySelect">2. Способ кладки стен</label>
+              <div class="calc-field" style="margin-bottom: 14px;">
+                <select id="calcMasonrySelect" class="calc-select-large">
+                  <option value="half" selected>0.5 кирпича (120 мм)</option>
+                  <option value="one">1.0 кирпич (250 мм)</option>
+                  <option value="one_and_half">1.5 кирпича (380 мм)</option>
+                  <option value="two">2.0 кирпича (510 мм)</option>
+                  <option value="two_and_half">2.5 кирпича (640 мм)</option>
+                </select>
+              </div>
+
+              <div class="calc-params-subrow">
+                <div class="calc-field">
+                  <label>Размер кирпича</label>
+                  <div class="calc-inline-radios">
+                    <label><input type="radio" name="calc_size" value="250x120x88" checked /> 250×120×88 (полуторный)</label>
+                    <label><input type="radio" name="calc_size" value="250x120x65" /> 250×120×65 (одинарный)</label>
+                  </div>
+                </div>
+
+                <div class="calc-field">
+                  <label for="calcWasteSelect">Запас на бой и подрезку</label>
+                  <select id="calcWasteSelect">
+                    <option value="5" selected>5% (рекомендуется)</option>
+                    <option value="0">0% (без запаса)</option>
+                    <option value="7">7% (сложная форма / выступы)</option>
+                    <option value="10">10% (фигурная резка / арки)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Цветовое решение / Мозаика -->
+            <div class="calc-section">
+              <div class="calc-section-header">
+                <label class="calc-label">3. Цветовое решение</label>
+                <div class="calc-inline-radios">
+                  <label id="calcMosaicModeRadioLabel">
+                    <input type="radio" name="calc_color_mode" value="mosaic" checked />
+                    <span>🎨 Проект-Мозаика (микс)</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="calc_color_mode" value="single" />
+                    <span>🧱 Один цвет</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Блок мозаики -->
+              <div id="calcMosaicControls" class="calc-mosaic-box">
+                <div class="calc-mosaic-actions-bar">
+                  <span class="calc-sublabel">Выберите цвета и укажите желаемые доли (%):</span>
+                  <button type="button" id="calcSync3DBtn" class="btn btn-sm btn--outline" title="Загрузить текущий микс из 3D-конструктора">
+                    🔄 Взять из 3D
+                  </button>
+                </div>
+
+                <div id="calcMosaicSlidersList" class="calc-colors-sliders-list"></div>
+              </div>
+
+              <!-- Блок одного цвета -->
+              <div id="calcSingleControls" class="calc-single-box" style="display: none;">
+                <label for="calcSingleColor">Цвет кирпича:</label>
+                <select id="calcSingleColor"></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Правая колонка: Итоги расчета -->
+          <div class="calc-col-summary">
+            <div class="calc-summary-card">
+              <div class="calc-summary-header">
+                <h3>Примерная смета</h3>
+              </div>
+
+              <!-- Главная стоимость со знаком ~ -->
+              <div class="calc-hero-cost">
+                <span class="calc-hero-label">Ориентировочная стоимость кирпича:</span>
+                <div class="calc-hero-value" id="resTotalCost">~ 0 ₽</div>
+                <div class="calc-hero-sub">Примерная сумма для понимания бюджета</div>
+              </div>
+
+              <!-- Полоса распределения цветов -->
+              <div class="calc-ratio-container">
+                <label class="calc-sublabel">Распределение цветов:</label>
+                <div id="calcRatioBar" class="calc-ratio-bar"></div>
+              </div>
+
+              <!-- Основные показатели -->
+              <div class="calc-stats-grid">
+                <div class="calc-stat-item">
+                  <div class="calc-stat-num" id="resTotalBricks">0 шт.</div>
+                  <div class="calc-stat-lbl">Всего кирпича (с запасом)</div>
+                </div>
+                <div class="calc-stat-item">
+                  <div class="calc-stat-num" id="resWallArea">0 м²</div>
+                  <div class="calc-stat-lbl">Площадь стен</div>
+                </div>
+              </div>
+
+              <!-- Таблица сметы -->
+              <div class="calc-table-wrap">
+                <table class="calc-estimate-table">
+                  <thead>
+                    <tr>
+                      <th>Цвет</th>
+                      <th>Доля</th>
+                      <th>Кол-во</th>
+                      <th>Цена</th>
+                      <th>Сумма</th>
+                    </tr>
+                  </thead>
+                  <tbody id="calcEstimateTableBody"></tbody>
+                </table>
+              </div>
+
+              <div class="calc-note">
+                💡 <em>Расчет является предварительным. Точный расчет с учетом особенностей вашего проекта, доставки и разгрузки выполнит специалист при звонке.</em>
+              </div>
+
+              <!-- Единственная главная кнопка действия -->
+              <div class="calc-actions-panel">
+                <button type="button" id="calcAddToCartBtn" class="btn btn-primary calc-btn-add-cart">
+                  🛒 Добавить все позиции в корзину
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script type="module" src="js/prices.js"></script>
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/view2d.js"></script>
     <script type="module" src="js/mosaic.js"></script>
     <script type="module" src="js/cart.js"></script>
+    <script type="module" src="js/calc.js"></script>
     <script type="module" src="js/viewed.js"></script>
     <script type="module" src="js/feedback.js"></script>
   </body>

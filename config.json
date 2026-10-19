@@ -21,10 +21,12 @@
       "name": "Пятиэтажный дом",
       "path": "./models/five_story_building/scene.gltf",
       "camera": {
-        "offset": 0.12,
-        "azimuthDeg": 32,
-        "startHeightRatio": 0.1,
-        "minZoomRatio": 0.08,
+        "distance": 33.0,
+        "azimuthDeg": -3,
+        "startHeightRatio": 0.40,
+        "cameraHeightRatio": 0.27,
+        "minDistance": 0.5,
+        "maxDistance": 100.0,
         "near": 0.1
       }
     }

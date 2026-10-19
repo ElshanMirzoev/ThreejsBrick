@@ -1,23 +1,22 @@
 // js/cart.js
 // Модуль корзины с отправкой заявки на email через FormSubmit
 
-// ================================================================
-// НАСТРОЙКИ
-// ================================================================
+import { getBrickPrice, getProductData, onPricesUpdated } from "./prices.js";
+
+// Настройки
 const RECIPIENT_EMAIL = "26a.l.e.x07@mail.ru"; // ← ЗАМЕНИТЕ НА EMAIL ЗАКАЗЧИКА ПРИ НЕОБХОДИМОСТИ
 const FORM_SUBMIT_URL = `https://formsubmit.co/ajax/${RECIPIENT_EMAIL}`;
 
-const BRICK_PRICE = 22.70;              // Базовая цена рядового полуторного кирпича, ₽ за шт.
 const STORAGE_KEY = "cart_items_v1";    // ключ корзины
 const ORDERS_KEY  = "cart_orders_v1";   // ключ истории заявок
 
 const COLOR_NAMES = {
-  gray:  "Серо-голубой",
-  gray2: "Тёмно-серый",
-  pink:  "Розово-персиковый",
-  peach: "Персиковый",
-  beige: "Бежево-кремовый",
-  cream: "Кремово-белый",
+  gray:  "Рядовой (пустотелый)",
+  gray2: "Графит",
+  pink:  "Красный",
+  peach: "Оранжевый",
+  beige: "Желтый",
+  cream: "Разнотон",
 };
 
 const COLOR_HEX = {
@@ -29,21 +28,10 @@ const COLOR_HEX = {
   cream: "#f0e8d8",
 };
 
-// ================================================================
-// АКТУАЛЬНЫЕ ЦЕНЫ И ФОТО ПРОДУКЦИИ ЧЗСК (silicatbrick.ru)
-// ================================================================
-const COLOR_PRICES = {
-  gray: 22.70,   // Кирпич силикатный утолщенный рядовой полнотелый СУРПо М-200
-  cream: 21.30,  // Кирпич силикатный утолщенный рядовой пустотелый СУРПу М-150
-  gray2: 35.50,  // Кирпич силикатный утолщенный окрашенный «Графит» М-150
-  peach: 35.50,  // Кирпич силикатный утолщенный окрашенный «Оранжевый» М-150
-  pink: 35.50,   // Кирпич силикатный утолщенный окрашенный «Красный» М-150
-  beige: 35.50,  // Кирпич силикатный утолщенный окрашенный «Желтый» М-150
-};
-
+// Фото продукции
 const COLOR_PRODUCT_IMAGES = {
   gray: "images/products/utolschennyy_gray.jpg",
-  cream: "images/products/utolschennyy_cream.jpg",
+  cream: "images/products/utolschennyy_raznoton.jpg",
   gray2: "images/products/utolschennyy_gray2.jpg",
   peach: "images/products/utolschennyy_peach.jpg",
   pink: "images/products/utolschennyy_pink.jpg",
@@ -51,22 +39,18 @@ const COLOR_PRODUCT_IMAGES = {
 };
 
 const COLOR_OFFICIAL_NAMES = {
-  gray: "Кирпич полнотелый рядовой СУРПо М-200",
-  cream: "Кирпич пустотелый рядовой СУРПу М-150",
+  gray: "Кирпич рядовой пустотелый СУРПу М-150",
+  cream: "Кирпич окрашенный «Разнотон» М-150",
   gray2: "Кирпич окрашенный «Графит» М-150",
   peach: "Кирпич окрашенный «Оранжевый» М-150",
   pink: "Кирпич окрашенный «Красный» М-150",
   beige: "Кирпич окрашенный «Желтый» М-150",
 };
 
-// ================================================================
-// СОСТОЯНИЕ
-// ================================================================
+// Состояние
 let cart = loadCart();
 
-// ================================================================
 // DOM
-// ================================================================
 const cartBtn        = document.getElementById("cartBtn");
 const cartCount      = document.getElementById("cartCount");
 const addToCartBtn   = document.getElementById("addToCartBtn");
@@ -84,24 +68,25 @@ const checkoutForm   = document.getElementById("checkoutForm");
 
 const thanksModal    = document.getElementById("thanksModal");
 
-// ================================================================
-// ХРАНИЛИЩЕ
-// ================================================================
+// Хранилище
 function loadCart() {
   try {
     const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!Array.isArray(data)) return [];
     return data.map((item) => {
       const color = item.color || "gray";
-      const officialPrice = COLOR_PRICES[color] || 22.70;
+      const size = item.size || "250x120x88";
+      const officialPrice = getBrickPrice(size, color);
+      const prod = getProductData(size, color);
       return {
         ...item,
-        price: item.price === 40 || !item.price ? officialPrice : item.price,
-        imageUrl: item.imageUrl || COLOR_PRODUCT_IMAGES[color] || "",
+        size,
+        price: officialPrice,
+        imageUrl: item.imageUrl || prod?.imageUrl || COLOR_PRODUCT_IMAGES[color] || "",
         name:
           item.name && !item.name.includes("40")
             ? item.name
-            : COLOR_OFFICIAL_NAMES[color] || "Кирпич силикатный • " + (COLOR_NAMES[color] || color),
+            : prod?.name || COLOR_OFFICIAL_NAMES[color] || "Кирпич силикатный • " + (COLOR_NAMES[color] || color),
       };
     });
   } catch {
@@ -113,9 +98,7 @@ function saveCart() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
 }
 
-// ================================================================
-// ФОРМАТ ЦЕНЫ
-// ================================================================
+// Формат цены
 function formatPrice(n) {
   const num = typeof n === "number" ? n : parseFloat(n) || 0;
   return (
@@ -126,9 +109,7 @@ function formatPrice(n) {
   );
 }
 
-// ================================================================
-// ЛОГИКА КОРЗИНЫ
-// ================================================================
+// Логика корзины
 function cartTotal() {
   return cart.reduce((s, i) => s + i.price * i.qty, 0);
 }
@@ -136,10 +117,13 @@ function cartCountTotal() {
   return cart.reduce((s, i) => s + i.qty, 0);
 }
 
-function addItem(color, qty = 1, customPrice = null, customName = null, customImage = null) {
-  const price = customPrice !== null ? customPrice : (COLOR_PRICES[color] || 22.70);
-  const name = customName || COLOR_OFFICIAL_NAMES[color] || ("Кирпич силикатный • " + (COLOR_NAMES[color] || color));
-  const imageUrl = customImage || COLOR_PRODUCT_IMAGES[color] || "";
+function addItem(color, qty = 1, customPrice = null, customName = null, customImage = null, customSize = null) {
+  const currentSizeRadio = document.querySelector('input[name="size"]:checked');
+  const size = customSize || (currentSizeRadio ? currentSizeRadio.value : "250x120x88");
+  const price = customPrice !== null ? customPrice : getBrickPrice(size, color);
+  const prod = getProductData(size, color);
+  const name = customName || prod?.name || COLOR_OFFICIAL_NAMES[color] || ("Кирпич силикатный • " + (COLOR_NAMES[color] || color));
+  const imageUrl = customImage || prod?.imageUrl || COLOR_PRODUCT_IMAGES[color] || "";
 
   const existing = cart.find((i) => i.name === name && Math.abs(i.price - price) < 0.01);
   if (existing) {
@@ -147,6 +131,7 @@ function addItem(color, qty = 1, customPrice = null, customName = null, customIm
     if (!existing.imageUrl && imageUrl) existing.imageUrl = imageUrl;
   } else {
     cart.push({
+      size,
       color,
       name,
       price,
@@ -172,9 +157,7 @@ function changeQty(index, delta) {
   renderAll();
 }
 
-// ================================================================
-// РЕНДЕР
-// ================================================================
+// Рендер
 function renderAll() {
   renderCount();
   renderCartModal();
@@ -189,7 +172,9 @@ function renderPanelTotal() {
   if (!cartPanelTotal || !cartQtyInput) return;
   const qty = parseInt(cartQtyInput.value, 10) || 1;
   const color = cartColorSel?.value || "gray";
-  const unitPrice = COLOR_PRICES[color] || 22.70;
+  const sizeRadio = document.querySelector('input[name="size"]:checked');
+  const size = sizeRadio ? sizeRadio.value : "250x120x88";
+  const unitPrice = getBrickPrice(size, color);
   cartPanelTotal.textContent = formatPrice(qty * unitPrice);
 }
 
@@ -237,15 +222,11 @@ function renderCartModal() {
   if (checkoutBtn) checkoutBtn.disabled = false;
 }
 
-// ================================================================
-// МОДАЛКИ
-// ================================================================
+// Модалки
 function openModal(el)  { if (el) el.hidden = false; }
 function closeModal(el) { if (el) el.hidden = true; }
 
-// ================================================================
-// ОТПРАВКА НА EMAIL (FormSubmit AJAX)
-// ================================================================
+// Отправка на email (formsubmit AJAX)
 async function sendOrderToEmail(order) {
   const itemsText = order.items
     .map((i) => `• ${i.name} — ${i.qty} шт. × ${i.price} ₽ = ${i.qty * i.price} ₽`)
@@ -284,9 +265,7 @@ async function sendOrderToEmail(order) {
   return response.json();
 }
 
-// ================================================================
-// СТАТУС ФОРМЫ
-// ================================================================
+// Статус формы
 function showFormStatus(message, type = "ok") {
   const box = checkoutForm.querySelector("[data-status]");
   if (!box) return;
@@ -302,9 +281,7 @@ function clearFormStatus() {
   }
 }
 
-// ================================================================
-// СОБЫТИЯ
-// ================================================================
+// События
 function initCart() {
   // Синхронизация цвета в корзине при выборе цвета в конфигураторе
   document.querySelectorAll('input[name="color_brick"]').forEach((radio) => {
@@ -319,6 +296,19 @@ function initCart() {
   if (cartColorSel) {
     cartColorSel.addEventListener("change", renderPanelTotal);
   }
+
+  // Синхронизация размера в корзине при смене размера в конфигураторе
+  document.querySelectorAll('input[name="size"]').forEach((radio) => {
+    radio.addEventListener("change", () => {
+      if (cartColorSel) {
+        const grayOption = cartColorSel.querySelector('option[value="gray"]');
+        if (grayOption) {
+          grayOption.textContent = radio.value === "250x120x65" ? "Рядовой (полнотелый)" : "Рядовой (пустотелый)";
+        }
+      }
+      renderPanelTotal();
+    });
+  });
 
   // Пересчёт «Итого» при вводе количества
   if (cartQtyInput) {
@@ -444,6 +434,17 @@ function initCart() {
     });
   }
 
+  // Подписка на автоматическое обновление цен из сети
+  onPricesUpdated(() => {
+    cart.forEach((item) => {
+      if (item.size && item.color) {
+        item.price = getBrickPrice(item.size, item.color);
+      }
+    });
+    saveCart();
+    renderAll();
+  });
+
   // Начальный рендер
   renderAll();
 }
@@ -455,7 +456,7 @@ if (document.readyState === "loading") {
 }
 
 // Экспорт для модуля просмотренных товаров (viewed.js)
-export { addItem, COLOR_NAMES, COLOR_HEX, BRICK_PRICE, COLOR_PRICES, COLOR_PRODUCT_IMAGES, formatPrice };
+export { addItem, COLOR_NAMES, COLOR_HEX, COLOR_PRODUCT_IMAGES, formatPrice };
 
 // Глобальный доступ при необходимости
 if (typeof window !== "undefined") {
@@ -463,8 +464,6 @@ if (typeof window !== "undefined") {
     addItem,
     COLOR_NAMES,
     COLOR_HEX,
-    BRICK_PRICE,
-    COLOR_PRICES,
     COLOR_PRODUCT_IMAGES,
     formatPrice,
   };
